@@ -10,18 +10,31 @@ The [iRC User Manual](https://www.igus.eu/ContentData/Products/Downloads/iRC_R13
 The [Robot Software](https://www.igus.eu/info/robot-software) page also has interesting documentation. Here one can find information on the [Modbus Server](https://wiki.cpr-robots.com/index.php/Modbus_Server)
 
 
-## Connection using Ethernet
+## Connecting to the robot using Ethernet
 
-Robot uses linux based system for its main computer with IP 192.168.3.11/24
-PC connecting to it must have an IP address in the range of 192.168.3.0-255/24
+The robot uses linux based system for its main computer with IP `192.168.3.11/24`
 
-An ethernet cable can be connected between the robot and the PC, or to connect the robot to a LAN.
+A PC connecting to the robot must have an IP address in the `192.168.3.0/24` network. 
 
-The robot linux system can be accessed through SSH with username: robot and password: robot
+> We use `192.168.3.1/24`
+>
+> Remember .0 and .255 cannot be used (they are the network and broadcast addresses)
 
-[Read more](https://cpr-robots.com/download/TinyCtrl/Filezilla_Putty_EmbCtrlAccess.pdf)
+The robot can be connected:
+- Directly to a PC
+- To a LAN
 
-## Start Up sequence
+In the Technikum, two configurations work:
+- Connect the robot to an ethernet port (usnig a network cable) and then connect the PC to the Technikum's WiFi.
+- Connect the robot directly to the PC's ethernet port.
+
+The robot linux system can be accessed through SSH with:
+- username: `robot` 
+- password: `robot`
+
+Read more [here](https://cpr-robots.com/download/TinyCtrl/Filezilla_Putty_EmbCtrlAccess.pdf)
+
+## Robot start Up sequence
 
 Steps:
 - connect
@@ -33,29 +46,31 @@ Steps:
 
 ## ModbusTCP
 
-The modbus server of the robot is implemented in the TinyCtrl robot control. Versions 12 and 13 of the modbus require license. Without a license the modbusTPC server can oly be used for 30 mins. Robot must be restarted to get another 30 mins. Verion 14 and after can be used without a license. 
+The modbus server of the robot is implemented in the TinyCtrl robot control. Versions 12 and 13 of the modbus require license. Without a license the modbusTPC server can only be used for 30 mins. The robot must be restarted to get another 30 mins to play. Verion 14 and after can be used without a license. 
 
 > NOTE: Check what version of the modbusTCP implementation the robot is using!!!!!
 
-Read more [here](https://wiki.cpr-robots.com/index.php/Modbus_Server) and also in the User Manual
+> Read more [here](https://wiki.cpr-robots.com/index.php/Modbus_Server) and also in the User Manual
 
 ### Test connection
 
 To test whether the Modbus connection is successful the input registers on addresses 0-3 can be read: These contain the TinyCtrl version and mapping version, e.g. 980, 12, 20, 1.
 
-### Moving using modbusTCP
+### Moving the robot using modbusTCP
 
 The approach for sending a position and starting a motion is the same for all types:
 
 - Write the position values to the holding registers
 - Write the motion velocity to holding register 180
-- Write a rising edge (0, then 1) to the coil to start the motion
+- Write a rising edge (0 then 1) to the coil to start the motion
 
 The register and coil addresses depend on the motion type, you will find them in the user manual.
 
-Read more (here)[https://wiki.cpr-robots.com/index.php/Moving_Robots_via_Modbus]
+> Read more [here](https://wiki.cpr-robots.com/index.php/Moving_Robots_via_Modbus)
 
 # Gripper
+
+The gripper is part of the delta robot.
 
 Two servos are used to control the gripper. One rotates the gripper along the z axis. Another closes and opens the grip.
 
@@ -67,22 +82,78 @@ There is a way to control these two servos using the RberryPi:
 
 # RaspberryPi
 
-## Python
-Installed python3.12.3 as alternate install and made it the default for python3 command
-Read more [here](https://raspberrytips.com/install-latest-python-raspberry-pi/)
+A RaspberryPi is used as PC to connect with the robot. 
 
-Installed packages:
-- pyModbusTCP
-- numpy
-
+The code provided by [YAlsaady Delta Robot GitHub Repo](https://github.com/YAlsaady/IGUS_Delta_Robot) works at first glance. A deeper dive reveals some inconsistencies such as:
+- waiting for robot to move does not work as expected
+- python `match` statement is used but the python version in the pi does not support this.
 
 ## IP Address
 
-Assigned a static IP address to ethernet port as:
+As stated previously in [Connecting to the robot using Ethernet](./README.md#connecting-to-the-robot-using-ethernet), a static IP address has been assigned to the ethernet port  as:
 ```bash
 sudo ifconfig eth0 192.168.3.1/24
 ```
 
-This allows the Delta robot to be connected directly to the pi instead of the Technikum WLAN. 
+This allows the Delta robot to be connected directly to the pi instead of the Technikum LAN. The robot is no longer accessible in the WLAN but it no longer has to be connected to a wall socket!
 
-The pi's IP address must be in the subnet of 192.168.3.0-255/24
+## Python Runtime
+
+The installed python version found in the pi is 3.9.
+
+I've installed `python3.12.3` as alternate install.
+
+These are the steps to install it:
+```bash
+# install ssl libs and other required packages
+sudo apt install -y build-essential zlib1g-dev libncurses5-dev libgdbm-dev libnss3-dev libssl-dev libreadline-dev libffi-dev wget cmake
+
+# download python tarball
+wget https://www.python.org/ftp/python/3.12.3/Python-3.12.3.tgz
+
+# un tar it
+tar -zxvf Python-3.12.3.tgz 
+
+# configure installation
+cd Python-3.12.3/
+./configure --enable-optimizations
+
+# install along side existing python
+sudo make altinstall
+```
+
+The new python should be installed under `/usr/local/bin`
+
+> Read more [here](https://raspberrytips.com/install-latest-python-raspberry-pi/)
+
+After installation, create a symlink to access `python3.12` as `python312`:
+```bash
+cd /usr/local/bin
+ln -s python3.12 python312
+```
+
+### Python virtual environment
+
+A virtual env allows you to encapsulate your python development and runtime environment. 
+
+This is useful when several persons are working on the same host or you are trying out different versions of the same packages.
+
+Create a virtual env named `venv312` in your home directory as:
+```bash
+cd ~
+python312 -m venv venv312
+```
+
+To have the venv activated when the user logs in, add this line in the `~/.bashrc` file: 
+```
+source ~/venv312/bin/activate
+```
+
+Now install the following packages using pip (versions are at the time of install)
+- numpy==1.26.4
+- pip==24.0
+- pyModbusTCP==0.2.1
+- setuptools==69.5.1
+- wheel==0.43.0
+
+> Numpy requires setuptools and wheel, and it is only required for the `linspace` function. TODO check if this function can be custom.
