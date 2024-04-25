@@ -12,37 +12,42 @@ def main():
 
     if dr.is_connected:
 
-        dr.reset()
+
         dr.enable()
         
-        dr.set_velocity(300)
-
-        # dr.set_target_position_cart(0, 0, 250)
-        # dr.start_move_to_cartesian()
-
-        # dr.reference()
-        # dr.set_target_position_cart(0, 0, 0)
-        # dr.start_move_to_cartesian()
-    
-
-        print("move 1")
-        dr.move_cartesian(0, 0, 0)
-        print(dr.get_kinematics_error())
-        print(dr.get_robot_errors())
-
-        print("move 2")
-        dr.move_cartesian(100, 100, 250)
-        print(dr.get_kinematics_error())
-        print(dr.get_robot_errors())
+        if dr.get_kinematics_error():
+            print("Kinematics errors found. Resetting..")
+            dr.reset()
         
-        print("move 3")
-        dr.move_cartesian(-100, -100, 250)
-        print(dr.get_kinematics_error())
-        print(dr.get_robot_errors())
-        
-        # print("move 4")
-        # dr.reference()
-        # dr.move_cartesian(-50, -50,300)
+        dr.set_zero_torque(enable=False)
+        if not dr.is_referenced() and not dr.reference():
+            print("Coult NOT reference robot. Try again")
+            return
+        print("Robot is referenced!")
+
+        # dr.set_all_axes_to_zero()
+        dr.set_velocity(1000)
+
+        xyz = [
+            (0,0,0),
+            (10, 10, 250),
+            (-10, -10, 250),
+            (20, 20, 250),
+            (-20, -20, 250),
+            (30, 30, 250),
+            (-30, -30, 250),
+            (100, 100, 250),
+            (-100, -100, 250),
+        ]
+
+        for i, coord in enumerate(xyz):
+
+            print()
+            print(f"{i} - move to {coord} ====================================")
+            dr.move_cartesian(*coord)
+            print("k:", dr.get_kinematics_error())
+            print("m:", dr.get_robot_errors())
+
         
         
 

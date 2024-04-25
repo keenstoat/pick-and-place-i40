@@ -181,7 +181,7 @@ class HoldingReg(IntEnum):
 # 154-159 # int32 0.01 Target position external axes
 # 174-177 # int32 0.01mm Target position platform
 # 178-179 # int32 0.01° Target orientation platform
-    MOVE_SPEED = 180 # int16 0.1 Speed for MoveTo (percent or mm/s)
+    MOVE_TO_SPEED = 180 # int16 0.1 Speed for MoveTo (percent or mm/s)
 # 181-186 # int32 0.1 Target velocity of ext. axes in velocity mode
 # 181-186 # uint16 0.01% Velocity override
     MOVE_SPEED_OVERRIDE = 187 # int16 0.1 Speed for MoveTo (percent or mm/s)
