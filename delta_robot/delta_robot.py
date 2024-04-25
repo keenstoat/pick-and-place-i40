@@ -68,29 +68,37 @@ class DeltaRobot:
         self.client.write_single_coil(Coils.RESET_ROBOT, False)
         self.client.write_single_coil(Coils.RESET_ROBOT, True)
 
+    def is_enabled(self):
+        """
+        Check if the Robot is enabled.
+        """
+        self._fail_if_not_connected()
+        
+        return bool(self.client.read_coils(Coils.ENABLE_MOTORS)[0])
+    
     def enable(self):
         """
         Enable the motors of the Robot.
         """
         self._fail_if_not_connected()
 
+        if self.is_enabled():
+            return
+        
         self.client.write_single_coil(Coils.ENABLE_MOTORS, False)
         self.client.write_single_coil(Coils.ENABLE_MOTORS, True)
-        # TODO check if a wait is needed after enabling motors
-        sleep(0.1)
-        return self.is_enabled()
 
     def disable(self):
         """
         Disable the motors of the Robot.
         """
-        # TODO not sure this works - enabling motors requires a rising edge in the coil. Does a falling edge disables them?
         self._fail_if_not_connected()
 
-        if self.is_enabled():
-            self.client.write_single_coil(53, False)
-        self.client.write_single_coil(53, True)
-        sleep(0.1)
+        if not self.is_enabled():
+            return
+        
+        self.client.write_single_coil(Coils.ENABLE_MOTORS, False)
+        self.client.write_single_coil(Coils.ENABLE_MOTORS, True)
 
     def reference(self, force:bool=False, max_delay_ms=5000):
         """
@@ -108,34 +116,41 @@ class DeltaRobot:
 
         self._fail_if_not_connected()
 
-        timeout = time() + max_delay_ms
-        self.enable()
-        if force:
-            self.client.write_single_coil(Coils.REFERENCE_AXES, False)
-            self.client.write_single_coil(Coils.REFERENCE_AXES, True)
-            sleep(0.3)
-            while not self.is_referenced():
-                if time() > timeout:
-                    break
-            return
-        else:
-            if not self.is_referenced():
-                self.client.write_single_coil(Coils.REFERENCE_AXES, False)
-                self.client.write_single_coil(Coils.REFERENCE_AXES, True)
-                sleep(0.3)
-                while not self.is_referenced():
-                    if time() > timeout:
-                        break
-            else:
-                return
+        self.client.write_single_coil(Coils.REFERENCE_AXES, False)
+        self.client.write_single_coil(Coils.REFERENCE_AXES, True)
 
-    def is_enabled(self):
-        """
-        Check if the Robot is enabled.
-        """
-        self._fail_if_not_connected()
-        
-        return bool(self.client.read_coils(Coils.ENABLE_MOTORS)[0])
+        timeout = time() + max_delay_ms/1000
+        while not self.is_referenced() and time() < timeout:
+            sleep(0.2)
+
+        return self.is_referenced()
+
+
+
+
+
+
+
+        # timeout = time() + max_delay_ms/1000
+        # self.enable()
+        # if force:
+        #     self.client.write_single_coil(Coils.REFERENCE_AXES, False)
+        #     self.client.write_single_coil(Coils.REFERENCE_AXES, True)
+        #     sleep(0.3)
+        #     while not self.is_referenced():
+        #         if time() > timeout:
+        #             break
+        #     return
+        # else:
+        #     if not self.is_referenced():
+        #         self.client.write_single_coil(Coils.REFERENCE_AXES, False)
+        #         self.client.write_single_coil(Coils.REFERENCE_AXES, True)
+        #         sleep(0.3)
+        #         while not self.is_referenced():
+        #             if time() > timeout:
+        #                 break
+        #     else:
+        #         return
 
     def is_referenced(self):
         """
@@ -258,7 +273,7 @@ class DeltaRobot:
         self._fail_if_not_connected()
 
         if 0 < velocity <= 100:
-            self.client.write_single_register(187, 100 * velocity)
+            self.client.write_single_register(HoldingReg.MOVE_SPEED_OVERRIDE, velocity * 10)
             return True
         return False
 
@@ -279,7 +294,7 @@ class DeltaRobot:
 
         self.client.write_single_register(HoldingReg.MOVE_SPEED, velocity * 10)
 
-    def start_move_to_cartesian(self, relative_to:str=None, max_delay_ms=5000):
+    def start_move_to_cartesian(self, relative_to:str=None, max_delay_ms:int=10_000_000):
         """
         Move the end effector to the target position.
 
@@ -292,28 +307,27 @@ class DeltaRobot:
         :param relative: Specifies the reference frame for the movement (None for absolute, 'base', or 'tool').
         :type relative: str or None
         """
+
+        assert isinstance(max_delay_ms, int), f"The max delay value must be an int"
+
         self._fail_if_not_connected()
-        
+
         if relative_to is None:
             self.client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN, False)
             self.client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN, True)
-        if relative_to == "base":
+        elif relative_to == "base":
             self.client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN_BASE, False)
             self.client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN_BASE, True)
-        if relative_to == "tool":
+        elif relative_to == "tool":
             self.client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN_TOOL, False)
             self.client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN_TOOL, True)
-
-        timeout = time() + max_delay_ms
-
-        while max_delay_ms and self.is_moving():
-            if time() > timeout:
-                self.reset()
-                break
-            if self.has_general_error():
-                break
-            if self.has_kinematics_error():
-                break
+        else:
+            raise Exception("Relative to value must be None, base, or tool")
+        
+        if max_delay_ms > 0:
+            timeout = time() + max_delay_ms/1000
+            while self.is_moving() and time() < timeout:
+                sleep(0.1)
 
         return True
 
@@ -503,20 +517,20 @@ class DeltaRobot:
     def start_robot_program(self):
         self._fail_if_not_connected()
 
-        self.client.write_single_coil(Coils.IS_ROBOT_PROGRAM_RUNNING, False)
-        self.client.write_single_coil(Coils.IS_ROBOT_PROGRAM_RUNNING, True)
+        self.client.write_single_coil(Coils.ROBOT_PROGRAM_START_OR_CONTINUE, False)
+        self.client.write_single_coil(Coils.ROBOT_PROGRAM_START_OR_CONTINUE, True)
 
     def pause_robot_program(self):
         self._fail_if_not_connected()
 
-        self.client.write_single_coil(Coils.IS_ROBOT_PROGRAM_PAUSED, False)
-        self.client.write_single_coil(Coils.IS_ROBOT_PROGRAM_PAUSED, True)
+        self.client.write_single_coil(Coils.ROBOT_PROGRAM_PAUSE, False)
+        self.client.write_single_coil(Coils.ROBOT_PROGRAM_PAUSE, True)
 
     def stop_robot_program(self):
         self._fail_if_not_connected()
 
-        self.client.write_single_coil(Coils.IS_ROBOT_PROGRAM_STOPPED, False)
-        self.client.write_single_coil(Coils.IS_ROBOT_PROGRAM_STOPPED, True)
+        self.client.write_single_coil(Coils.ROBOT_PROGRAM_STOP, False)
+        self.client.write_single_coil(Coils.ROBOT_PROGRAM_STOP, True)
 
     def get_robot_program_runstate(self):
         """
@@ -1174,51 +1188,17 @@ class DeltaRobot:
 
 
     #  Custom functions =======================================================================
-    def set_and_move(
-        self,
-        val_1: float,
-        val_2: float,
-        val_3: float,
-        movement: int = "cartesian",
-        relative: str = None,
-        wait: bool = True,
-        velocity: float = None,
-    ):
-        """
-        Set the target position and move the end effector.
-
-        This method sets the target position of the end effector using the 'set_position_endeffector' method,
-        adjusts the velocity if specified, and then moves the end effector to the target position using the 'move_endeffector' method.
-        The movement can be relative to different reference frames (base, tool) based on the 'relative' parameter.
-        You can choose to wait until the movement is complete before returning.
-
-        :param val_1: The target position value (X, A1, or other axis, depending on the 'movement' parameter).
-        :type val_1: float
-        :param val_2: The target position value (Y, A2, or other axis, depending on the 'movement' parameter).
-        :type val_2: float
-        :param val_3: The target position value (Z, A3, or other axis, depending on the 'movement' parameter).
-        :type val_3: float
-        :param movement: Specifies the type of movement ('cartesian' or 'axes').
-        :type movement: str
-        :param relative: Specifies the reference frame for the movement (None for absolute, 'base', or 'tool').
-        :type relative: str or None
-        :param wait: If True (default), wait until the movement is complete before returning.
-        :type wait: bool
-        :param velocity: Optional velocity setting in millimeters per second.
-        :type velocity: float or None
-        """
+    def move_cartesian(self, x:int, y:int, z:int, velocity:int=None):
         self._fail_if_not_connected()
         
         if velocity:
             self.set_velocity(velocity)
-        if movement == "cartesian":
-            self.set_target_position_cart(val_1, val_2, val_3)
-            self.start_move_to_cartesian(relative_to=relative)
-        elif movement == "axes":
-            self.set_target_position_axes(val_1, val_2, val_3)
-            self.start_move_to_axes(wait=wait, relative=relative)
-        else:
-            return
+
+        # self.reset()
+        self.reference()
+        self.set_target_position_cart(x, y, z)
+        self.start_move_to_cartesian()
+
 
     def move_circular(self, radius:int, step:float=0.5, start_angle:int=0, stop_angle:int=360):
         """

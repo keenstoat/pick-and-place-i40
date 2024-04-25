@@ -47,14 +47,14 @@ class Coils(IntEnum):
     START_MOVE_TO_JOINTS            = 103 # (rising edge) Start MoveTo - joint movement
     START_MOVE_TO_JOINTS_RELATIVE   = 104 # (rising edge) Start MoveTo - joint movement relative
     
-    IS_ZERO_TORQUE_AVAILABLE    = 110 # (info) Is Zero-Torque (manual guidance mode) available?
-    ENABLE_ZERO_TORQUE          = 111 # (boolean) Is Zero-Torque enabled? / enable (1) / disable (0)
-    IS_ROBOT_MOVING             = 112 # (info) Is the robot moving?
-    IS_ROBOT_PROGRAM_LOADED     = 120 # (info) Is a robot program loaded?
-    IS_LOGIC_PROGRAM_LOADED     = 121 # (info) Is a logic program loaded?
-    IS_ROBOT_PROGRAM_RUNNING    = 122 # (rising edge) Is the robot program running? / start / continue
-    IS_ROBOT_PROGRAM_PAUSED     = 123 # (rising edge) Is robot program paused? / pause
-    IS_ROBOT_PROGRAM_STOPPED    = 124 # (rising edge) Is the robot program stopped? / stop
+    IS_ZERO_TORQUE_AVAILABLE            = 110 # (info) Is Zero-Torque (manual guidance mode) available?
+    ENABLE_ZERO_TORQUE                  = 111 # (boolean) Is Zero-Torque enabled? / enable (1) / disable (0)
+    IS_ROBOT_MOVING                     = 112 # (info) Is the robot moving?
+    IS_ROBOT_PROGRAM_LOADED             = 120 # (info) Is a robot program loaded?
+    IS_LOGIC_PROGRAM_LOADED             = 121 # (info) Is a logic program loaded?
+    ROBOT_PROGRAM_START_OR_CONTINUE     = 122 # (rising edge) Is the robot program running? / start / continue
+    ROBOT_PROGRAM_PAUSE                 = 123 # (rising edge) Is robot program paused? / pause
+    ROBOT_PROGRAM_STOP                  = 124 # (rising edge) Is the robot program stopped? / stop
     # 130 # (rising edge) Select next directory entry
     # 131 # (rising edge) Select previous directory entry
     # 132 # (info) Is the selected directory entry a program file
@@ -184,6 +184,7 @@ class HoldingReg(IntEnum):
     MOVE_SPEED = 180 # int16 0.1 Speed for MoveTo (percent or mm/s)
 # 181-186 # int32 0.1 Target velocity of ext. axes in velocity mode
 # 181-186 # uint16 0.01% Velocity override
+    MOVE_SPEED_OVERRIDE = 187 # int16 0.1 Speed for MoveTo (percent or mm/s)
 # 188 # enum Jog mode
     ROBOT_PROGRAM_RUN_STATE = 260 # enum Robot program RunState
     ROBOT_PROGRAM_REPLAY_MODE = 261 # enum Robot program Replay mode
