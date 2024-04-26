@@ -29,7 +29,7 @@ class Coils(IntEnum):
     KINEMATICS_ERROR_OUT_OF_RANGE               = 41 # (info) Kinematics - Out of range
     KINEMATICS_ERROR_WRIST_SINGULARITY          = 42 # (info) Kinematics - wrist singularity
     KINEMATICS_ERROR_VIRTUAL_BOX_REACHED        = 43 # (info) Kinematics - Virtual box reached
-    KINEMATICS_ERROR_MOVEMENT_NOT_ALLOWD        = 44 # (info) Kinematics - Movement not allowed
+    KINEMATICS_ERROR_MOVEMENT_NOT_ALLOWED       = 44 # (info) Kinematics - Movement not allowed
     # 45-49 (info) Kinematics - reserved for future errors
     CAN_BUS_CONNECTION          = 50 # (rising edge) Is CAN bus connected? / Connect (1) / Disconnect (0) (Connect / Disconnect not possible with TinyCtrl)
     SHUTDOWN_CONTROL_COMPUTER   = 51 # (rising edge) Shutdown control computer
@@ -55,8 +55,8 @@ class Coils(IntEnum):
     ROBOT_PROGRAM_START_OR_CONTINUE     = 122 # (rising edge) Is the robot program running? / start / continue
     ROBOT_PROGRAM_PAUSE                 = 123 # (rising edge) Is robot program paused? / pause
     ROBOT_PROGRAM_STOP                  = 124 # (rising edge) Is the robot program stopped? / stop
-    # 130 # (rising edge) Select next directory entry
-    # 131 # (rising edge) Select previous directory entry
+    SELECT_NEXT_DIR_ENTRY       = 130 # (rising edge) Select next directory entry
+    SELECT_PREVIOUS_DIR_ENTRY   = 131 # (rising edge) Select previous directory entry
     # 132 # (info) Is the selected directory entry a program file
     # 133 # (rising edge) Load selected directory entry as robot program / open directory
     # 134 # (rising edge) Go to the base directory (.../Data/Programs)
@@ -67,7 +67,6 @@ class Coils(IntEnum):
     # 364-427 # (info) Digital inputs
 
 class InputReg(IntEnum):
-    pass
     # 0 # (uint16) Software ID (902=iRC, 980=TinyCtrl)
     # 1 # (uint16) Software major version (e.g. 12)
     # 2 # (uint16) Software minor version (e.g. 6)
@@ -106,7 +105,7 @@ class InputReg(IntEnum):
     # 92 # (uint16) 0.01V Voltage
     # 93 # (uint16) mA Total Current
     # 94 # (uint16) 0.1% Battery charge (not in TinyCtrl)
-    # 95 # (uint16) enum Kinematics - error code
+    KINEMATICS_ERROR_CODE = 95 # (uint16) enum Kinematics - error code
     # 96 # (uint16) enum Operating mode
 
     # 130-135 # (int32) 0.01mm Current Cartesian position
@@ -136,17 +135,20 @@ class InputReg(IntEnum):
     # 154-159 # (int32) 0.01 Actual axis position ext. axes
     # 160-165 # (int32) 0.01 Actual axis position of gripper axes
     # 166-173 # (int32) 0.01 Actual axis position platform
-    # 262 # (uint16) Number of loaded robot programs
-    # 263 # (int16) Number of current program, 0 for main program
-    # 264 # (uint16) Number of instructions in current program
+
+    NUMBER_OF_LOADED_ROBOT_PROGRAMS                 = 262 # (uint16) Number of loaded robot programs
+    NUMBER_OF_CURRENT_ROBOT_PROGRAM                 = 263 # (int16) Number of current program, 0 for main program
+    NUMBER_OF_INSTRUCTIONS_IN_CURRENT_ROBOT_PROGRAM = 264 # (uint16) Number of instructions in current program
 
     # 265 # (int16) Number of current instruction, -1 if program is not running
     # 266 # enum Reason for last program stop or pause
-    # 331 # (uint16) Number of entries in current directory
-    # 333-364 # string Name of the selected directory entry
+    NUMBER_OF_ENTRIES_IN_CURRENT_DIR = 331 # (uint16) Number of entries in current directory
+    NAME_OF_SELECTED_DIRECTORY_ENTRY_START = 333 # string Name of the selected directory entry
+    NAME_OF_SELECTED_DIRECTORY_ENTRY_END = 364 # string Name of the selected directory entry
     # 365-396 # string Name of the current directory
     # 207-210 # (bit field) Digital inputs
-    # 400-431 # string Info/error message short (as on manual control unit)
+    INFO_OR_ERROR_SHORT_MESSAGE_START = 400 # string Info/error message short (as on manual control unit)
+    INFO_OR_ERROR_SHORT_MESSAGE_END   = 431 # string Info/error message short (as on manual control unit)
     # 440-455 # (int16) Number variables mb_num_r1 - mb_num_r16
     # 456-711 # (int16) 0.1 Position variables mb_pos_r1 - mb_pos_r16 (see sec. 12.4.4)
 
@@ -178,21 +180,20 @@ class HoldingReg(IntEnum):
     TARGET_POSITION_AXIS_C_LSB = 146
     TARGET_POSITION_AXIS_C_MSB = 147
 
-# 154-159 # int32 0.01 Target position external axes
-# 174-177 # int32 0.01mm Target position platform
-# 178-179 # int32 0.01° Target orientation platform
+    # 154-159 # int32 0.01 Target position external axes
+    # 174-177 # int32 0.01mm Target position platform
+    # 178-179 # int32 0.01° Target orientation platform
     MOVE_TO_SPEED = 180 # int16 0.1 Speed for MoveTo (percent or mm/s)
-# 181-186 # int32 0.1 Target velocity of ext. axes in velocity mode
-# 181-186 # uint16 0.01% Velocity override
+    # 181-186 # int32 0.1 Target velocity of ext. axes in velocity mode
     MOVE_SPEED_OVERRIDE = 187 # int16 0.1 Speed for MoveTo (percent or mm/s)
-# 188 # enum Jog mode
+    # 188 # enum Jog mode
     ROBOT_PROGRAM_RUN_STATE = 260 # enum Robot program RunState
     ROBOT_PROGRAM_REPLAY_MODE = 261 # enum Robot program Replay mode
     ROBOT_PROGRAM_NAME_START    = 267 # 267-298 # string Name of loaded robot program / load on write
     ROBOT_PROGRAM_NAME_END      = 298 # 267-298 # string Name of loaded robot program / load on write
-# 299-330 # string Name of the loaded logic program / load on write
-# 332 # uint16 Number of the selected directory entry
-# 200-206 # bit field Global signals
-# 207-210 # bit field Digital outputs
-# 440-455 # int16 Number variables mn_num_w1 - mb_num_w16
-# 456-711 # int16 0.1 Position variables mb_pos_w1 - mb_pos_w16 (see sec. 12.4.4)
+    # 299-330 # string Name of the loaded logic program / load on write
+    # 332 # uint16 Number of the selected directory entry
+    # 200-206 # bit field Global signals
+    # 207-210 # bit field Digital outputs
+    # 440-455 # int16 Number variables mn_num_w1 - mb_num_w16
+    # 456-711 # int16 0.1 Position variables mb_pos_w1 - mb_pos_w16 (see sec. 12.4.4)

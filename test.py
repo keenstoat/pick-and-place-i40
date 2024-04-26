@@ -3,50 +3,45 @@
 from delta_robot.delta_robot import DeltaRobot
 from time import sleep
 
-delta_robot_ip_addr = "192.168.3.11"
+# delta_robot_ip_addr = "192.168.3.11"
+delta_robot_ip_addr = "localhost"
+delta_robot_port = 5020
 
 def main():
 
-    dr = DeltaRobot(delta_robot_ip_addr)
-    wait = True
-
+    dr = DeltaRobot(delta_robot_ip_addr, port=delta_robot_port)
     if dr.is_connected:
 
+        print(dr.get_module_error_list())
+        print(dr.get_kinematics_error())
+        print("info or error: ", dr.get_info_or_message())
 
         dr.enable()
-        
-        if dr.get_kinematics_error():
-            print("Kinematics errors found. Resetting..")
+        if not dr.is_referenced():
+            print("Robot NOT referenced. Resetting now.")
             dr.reset()
-        
-        dr.set_zero_torque(enable=False)
-        if not dr.is_referenced() and not dr.reference():
-            print("Coult NOT reference robot. Try again")
-            return
+            if not dr.reference():
+                print("Coult NOT reference robot. Try again")
+                return
         print("Robot is referenced!")
 
-        # dr.set_all_axes_to_zero()
+        dr.set_override_velocity(100)
         dr.set_velocity(1000)
 
         xyz = [
-            (0,0,0),
-            (10, 10, 250),
-            (-10, -10, 250),
-            (20, 20, 250),
-            (-20, -20, 250),
-            (30, 30, 250),
-            (-30, -30, 250),
-            (100, 100, 250),
-            (-100, -100, 250),
+            (150, 150, 200),
+            (-150, 150, 200),
+            (-150, -150, 200),
+            (150, -150, 200),
         ]
 
-        for i, coord in enumerate(xyz):
+        for _ in range(10):
+            for i, coord in enumerate(xyz):
+                print()
+                print(f"{i} - move to {coord} ====================================")
+                dr.move_cartesian(*coord)
+                print("moved to > ", dr.get_target_position_cart())
 
-            print()
-            print(f"{i} - move to {coord} ====================================")
-            dr.move_cartesian(*coord)
-            print("k:", dr.get_kinematics_error())
-            print("m:", dr.get_robot_errors())
 
         
         
@@ -72,27 +67,9 @@ def main():
         # input("continue...")
         # dr.control_gripper(0,180)
 
-        # input("continue...")
-        # dr.set_velocity(50)
-        # for z in range(0, 300, 50):
-        #     print("Kinematics error: ", dr.get_kinematics_error())
-        #     dr.set_position_endeffector(0, 0, z)
-        #     dr.move_endeffector()
-        #     print(dr.get_position_endeffector())
-
-
-        # input("continue...")
-        # dr.set_position_endeffector(100, 0, 150)
-        # dr.move_endeffector(wait)
-
-        # input("continue...")
-        # dr.set_position_endeffector(0, 200, 150)
-        # dr.move_endeffector(wait)
-
-        # input("continue...")
-        # dr.set_position_endeffector(-200, 200, 150)
-        # dr.move_endeffector(wait)
+        
     else:
         print("No Connection")
 
 main()
+

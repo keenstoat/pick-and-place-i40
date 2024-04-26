@@ -25,12 +25,6 @@ class DeltaRobot:
         self.is_connected = self.modbus_client.open()
         self._fail_if_not_connected()
 
-        # TODO check if this is required
-        # self.is_connected = self.modbus_client.open()
-        # if self.is_connected:
-        #     self.modbus_client.write_single_coil(134, False)
-        #     self.modbus_client.write_single_coil(134, True)
-
     def __del__(self):
         """
         Close current TCP connection.
@@ -55,6 +49,10 @@ class DeltaRobot:
         self.modbus_client.write_single_coil(reg_address, False)
         self.modbus_client.write_single_coil(reg_address, True)
         
+    def _log(self, *msg):
+
+        print(*msg)
+
     def shutdown(self):
         """
         Shutdown the Delta Robot
@@ -103,6 +101,7 @@ class DeltaRobot:
 
         self._send_rising_edge(Coils.REFERENCE_AXES)
 
+        self._log("Referencing robot now. This might take a while...")
         timeout = time() + max_delay_ms/1000
         while not self.is_referenced() and time() < timeout:
             sleep(0.5)
@@ -115,53 +114,20 @@ class DeltaRobot:
         
         return bool(self.modbus_client.read_coils(Coils.REFERENCE_AXES)[0])
 
-    def set_all_axes_to_zero(self):
-
-        self._fail_if_not_connected()
-        self._send_rising_edge(Coils.SET_ALL_AXES_TO_ZERO)
-
     def is_moving(self):
 
         self._fail_if_not_connected()
         return bool(self.modbus_client.read_coils(Coils.IS_ROBOT_MOVING)[0])
 
-    def is_program_loaded(self):
-        """
-        Check if a program is loaded.
-
-        This method checks if a program is loaded on the robot controller.
-
-        :return: True if a program is loaded, False otherwise.
-        :rtype: bool
-        """
+    def set_override_velocity(self, velocity_percentage:int=20):
         self._fail_if_not_connected()
-        
-        return bool(self.modbus_client.read_coils(Coils.IS_ROBOT_PROGRAM_LOADED)[0])
 
-    def is_zero_torque_available(self):
-        
-        self._fail_if_not_connected()
-        return bool(self.modbus_client.read_coils(Coils.IS_ZERO_TORQUE_AVAILABLE)[0])
+        # override velocity percentage has a precision of 0.01% so it needs to be multiplied by 100
+        if 0 < velocity_percentage <= 100:
+            self.modbus_client.write_single_register(HoldingReg.MOVE_SPEED_OVERRIDE, velocity_percentage * 100)
+            return True
+        return False
     
-    def is_zero_torque_enabled(self):
-        
-        self._fail_if_not_connected()
-        return bool(self.modbus_client.read_coils(Coils.ENABLE_ZERO_TORQUE)[0])
-
-    def set_zero_torque(self, enable:bool=True):
-        self._fail_if_not_connected()
-
-        # TODO check logic - may need to reference the robot after enabling zero torque
-        self.modbus_client.write_single_coil(Coils.ENABLE_ZERO_TORQUE, enable)
-        # if enable & (not self.is_zero_torque_enabled()):
-        #     self.client.write_single_coil(111, False)
-        #     self.client.write_single_coil(Coils.ENABLE_ZERO_TORQUE, True)
-        # elif not enable & (self.is_zero_torque_enabled()):
-        #     self.client.write_single_coil(111, False)
-        #     self.reset()
-        #     sleep(0.2)
-        #     self.enable()
-
     def set_velocity(self, velocity:int):
         """
         Set the velocity of the Robot.
@@ -198,18 +164,6 @@ class DeltaRobot:
         self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Z_LSB, (z & 0x0000FFFF))
         self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Z_MSB, (z >> 16) & 0x0000FFFF)
 
-    def set_target_orientation_cart(self, a: float, b: float, c: float):
-        # TODO check if this function is needed - delta robot does not have orientation of the end effector
-        self._fail_if_not_connected()
-
-        a *= 100
-        b *= 100
-        c *= 100
-
-        self.modbus_client.write_single_register(HoldingReg.TARGET_ORIENTATION_CART_A_LSB, a)
-        self.modbus_client.write_single_register(HoldingReg.TARGET_ORIENTATION_CART_B_LSB, b)
-        self.modbus_client.write_single_register(HoldingReg.TARGET_ORIENTATION_CART_C_LSB, c)
-
     def get_target_position_cart(self):
 
         self._fail_if_not_connected()
@@ -227,15 +181,20 @@ class DeltaRobot:
         z1 = c_int32(z1 | (z2 << 16)).value / 100
         return x1, y1, z1
 
+    def set_target_orientation_cart(self, a: float, b: float, c: float):
+        # TODO check if this function is needed - delta robot does not have orientation of the end effector
+        self._fail_if_not_connected()
+
+        a *= 100
+        b *= 100
+        c *= 100
+
+        self.modbus_client.write_single_register(HoldingReg.TARGET_ORIENTATION_CART_A_LSB, a)
+        self.modbus_client.write_single_register(HoldingReg.TARGET_ORIENTATION_CART_B_LSB, b)
+        self.modbus_client.write_single_register(HoldingReg.TARGET_ORIENTATION_CART_C_LSB, c)
+
     def get_target_orientation_cart(self):
-        """
-        Get the orientation of the Delta Robot's end effector.
-
-        This method reads the orientation values from input registers and returns them.
-
-        :return: A list (a, b, c) representing the orientation values.
-        :rtype: list[float]
-        """
+        
         self._fail_if_not_connected()
 
         a = self.modbus_client.read_input_registers(InputReg.TARGET_ORIENTATION_CART_A_LSB)[0] / 100
@@ -244,20 +203,8 @@ class DeltaRobot:
         return a, b, c
 
     def start_move_to_cartesian(self, relative_to:str=None, max_delay_ms:int=10_000_000):
-        """
-        Move the end effector to the target position.
 
-        This method moves the end effector to the specified Cartesian position by controlling the appropriate coil.
-        The movement can be relative to different reference frames (base, tool) based on the 'relative' parameter.
-        To specify the position, use the method set_position_endeffector(x, y, z).
-
-        :param wait: If True (default), wait until the movement is complete before returning.
-        :type wait: bool
-        :param relative: Specifies the reference frame for the movement (None for absolute, 'base', or 'tool').
-        :type relative: str or None
-        """
-
-        assert isinstance(max_delay_ms, int), f"The max delay value must be an int"
+        assert isinstance(max_delay_ms, int), f"The max_delay_value must be an int"
 
         self._fail_if_not_connected()
 
@@ -271,74 +218,23 @@ class DeltaRobot:
             self.modbus_client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN_TOOL, False)
             self.modbus_client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN_TOOL, True)
         else:
-            raise Exception("Relative to value must be None, base, or tool")
+            raise Exception("Relative to value must be None, 'base', or 'tool'")
         
         if max_delay_ms > 0:
             timeout = time() + max_delay_ms/1000
             while self.is_moving() and time() < timeout:
-                print("moving to > ", self.get_target_position_cart())
+                self._log("moving to > ", self.get_target_position_cart())
                 sleep(0.1)
-        print("moved to > ", self.get_target_position_cart())
-        return True
 
-    # Axis movement functions =====================================================================================
+    # Axis movement functions ==========================================================================================
+    
+    def set_target_position_axes(self, a1:float, a2:float, a3:float):
 
-    def start_move_to_axes(self, relative:bool=False, max_delay_ms=5000):
-        """
-        Move the end effector to the target position.
-
-        This method moves the end effector to the specified axes position by controlling the appropriate coil.
-        The movement can be relative or absolute 'relative' parameter.
-        To specify the position, use the method set_position_axes.
-
-        :param wait: If True (default), wait until the movement is complete before returning.
-        :type wait: bool
-        :param relative: If False (default), the movement will be absolute, otherwise will be relative to the current position
-        :type relative: bool
-        """
         self._fail_if_not_connected()
 
-        if relative:
-            self.modbus_client.write_single_coil(Coils.START_MOVE_TO_JOINTS_RELATIVE, False)
-            self.modbus_client.write_single_coil(Coils.START_MOVE_TO_JOINTS_RELATIVE, True)
-        else:
-            self.modbus_client.write_single_coil(Coils.START_MOVE_TO_JOINTS, False)
-            self.modbus_client.write_single_coil(Coils.START_MOVE_TO_JOINTS, True)
-
-        timeout = time() + max_delay_ms
-        while max_delay_ms and self.is_moving():
-            if time() > timeout:
-                self.reset()
-                break
-            if self.has_general_error():
-                break
-            if self.has_kinematics_error():
-                break
-            
-    def set_target_position_axes(self, a1:int, a2:int, a3:int):
-        """
-        Set the target position of the endeffector
-
-        This method allows you to set the target positions of the robot's axes.
-        The input values 'a1_val', 'a2_val', and 'a3_val' represent the target positions for each axis.
-        The positions are converted to the appropriate format and written to the respective registers.
-
-        The position can be absolute or relative.
-        To make the robot move, use the method move_axes().
-
-        :param a1_val: The target position for axis A1.
-        :type a1_val: float
-        :param a2_val: The target position for axis A2.
-        :type a2_val: float
-        :param a3_val: The target position for axis A3.
-        :type a3_val: float
-        :return: None
-        """
-        self._fail_if_not_connected()
-
-        a1 *= 100
-        a2 *= 100
-        a3 *= 100
+        a1 = int(a1 * 100)
+        a2 = int(a2 * 100)
+        a3 = int(a3 * 100)
 
         self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_AXIS_A_LSB, (a1 & 0x0000FFFF))
         self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_AXIS_A_MSB, (a1 >> 16) & 0x0000FFFF)
@@ -350,61 +246,54 @@ class DeltaRobot:
         self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_AXIS_C_MSB, (a3 >> 16) & 0x0000FFFF)
 
     def get_target_position_axes(self):
-        """
-        Get the positions of the Delta Robot's axes.
-
-        This method reads the positions of the robot's axes (A1, A2, and A3) from input registers
-        and returns them as a tuple.
-
-        :return: A list (a1_pos, a2_pos, a3_pos) representing the positions of the robot's axes.
-        :rtype: list[float]
-        """
         self._fail_if_not_connected()
         
-        a1_1 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_AXIS_A_LSB)[0]
-        a1_2 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_AXIS_A_MSB)[0]
-        a2_1 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_AXIS_B_LSB)[0]
-        a2_2 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_AXIS_B_MSB)[0]
-        a3_1 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_AXIS_C_LSB)[0]
-        a3_2 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_AXIS_C_MSB)[0]
+        a1_lsb = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_AXIS_A_LSB)[0]
+        a1_msb = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_AXIS_A_MSB)[0]
+        a2_lsb = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_AXIS_B_LSB)[0]
+        a2_msb = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_AXIS_B_MSB)[0]
+        a3_lsb = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_AXIS_C_LSB)[0]
+        a3_msb = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_AXIS_C_MSB)[0]
 
         # Combine the two 16-bit values into a 32-bit integer for each axis
-        a1_1 = c_int32(a1_1 | (a1_2 << 16)).value / 100
-        a2_1 = c_int32(a2_1 | (a2_2 << 16)).value / 100
-        a3_1 = c_int32(a3_1 | (a3_2 << 16)).value / 100
-        return a1_1, a2_1, a3_1
+        a1 = c_int32(a1_lsb | (a1_msb << 16)).value / 100
+        a2 = c_int32(a2_lsb | (a2_msb << 16)).value / 100
+        a3 = c_int32(a3_lsb | (a3_msb << 16)).value / 100
+        return a1, a2, a3
+
+    def start_move_to_axes(self, relative:bool=False, max_delay_ms:int=10_000_000):
+
+        self._fail_if_not_connected()
+
+        if relative:
+            self._send_rising_edge(Coils.START_MOVE_TO_JOINTS_RELATIVE)
+        else:
+            self._send_rising_edge(Coils.START_MOVE_TO_JOINTS)
+
+        if max_delay_ms > 0:
+            timeout = time() + max_delay_ms/1000
+            while self.is_moving() and time() < timeout:
+                sleep(0.01)
+    
+    # Robot programs ===================================================================================================
 
     def start_robot_program(self):
-        self._fail_if_not_connected()
 
-        self.modbus_client.write_single_coil(Coils.ROBOT_PROGRAM_START_OR_CONTINUE, False)
-        self.modbus_client.write_single_coil(Coils.ROBOT_PROGRAM_START_OR_CONTINUE, True)
+        self._fail_if_not_connected()
+        self._send_rising_edge(Coils.ROBOT_PROGRAM_START_OR_CONTINUE)
 
     def pause_robot_program(self):
-        self._fail_if_not_connected()
 
-        self.modbus_client.write_single_coil(Coils.ROBOT_PROGRAM_PAUSE, False)
-        self.modbus_client.write_single_coil(Coils.ROBOT_PROGRAM_PAUSE, True)
+        self._fail_if_not_connected()
+        self._send_rising_edge(Coils.ROBOT_PROGRAM_PAUSE)
 
     def stop_robot_program(self):
-        self._fail_if_not_connected()
 
-        self.modbus_client.write_single_coil(Coils.ROBOT_PROGRAM_STOP, False)
-        self.modbus_client.write_single_coil(Coils.ROBOT_PROGRAM_STOP, True)
+        self._fail_if_not_connected()
+        self._send_rising_edge(Coils.ROBOT_PROGRAM_STOP)
 
     def get_robot_program_runstate(self):
-        """
-        Get the current run state of the robot program.
 
-        This method reads the run state of the robot program and returns a descriptive string.
-        The possible run states are:
-        - "Program is not running": The robot program is not currently executing.
-        - "Program is running": The robot program is actively running.
-        - "Program is paused": The robot program is paused but can be resumed.
-
-        :return: A descriptive string representing the current run state.
-        :rtype: str
-        """
         self._fail_if_not_connected()
 
         code = self.modbus_client.read_holding_registers(HoldingReg.ROBOT_PROGRAM_RUN_STATE)[0]
@@ -415,21 +304,7 @@ class DeltaRobot:
             case _: return f"Unknown robot program state: '{code}'"
 
     def set_robot_program_replay_mode(self, mode):
-        """
-        Set the program replay mode for the robot.
-
-        This method allows you to configure the program replay mode for the robot.
-        The `mode` parameter specifies the desired mode and can take one of the following values:
-        - "once" (Default): Play the program once.
-        - "repeat": Repeat the program continuously.
-        - "step": Step through the program one instruction at a time.
-        - "fast": Not used (for future expansion).
-
-        :param mode: The desired program replay mode.
-        :type mode: str
-        :return: 0 if 
-        :rtype: int
-        """
+        
         self._fail_if_not_connected()
 
         if mode == "once":
@@ -442,23 +317,9 @@ class DeltaRobot:
             return self.modbus_client.write_single_register(HoldingReg.ROBOT_PROGRAM_REPLAY_MODE, 3)
         else:
             return False
-        
-        return True
 
     def get_program_replay_mode(self):
-        """
-        Get the current replay mode of the robot program.
 
-        This method reads the replay mode of the robot program and returns a descriptive string.
-        The possible replay modes are:
-        - "Run program once": The robot program will run once and stop.
-        - "Repeat program": The robot program will continuously repeat.
-        - "Execute instructions step by step": The robot program will execute instructions one at a time.
-        - "Fast" (Not used): A mode that is not currently used.
-
-        :return: A descriptive string representing the current replay mode.
-        :rtype: str
-        """
         self._fail_if_not_connected()
 
         code = self.modbus_client.read_holding_registers(HoldingReg.ROBOT_PROGRAM_REPLAY_MODE)[0]
@@ -470,56 +331,163 @@ class DeltaRobot:
             case _: return f"Unknown robot program replay mode: '{code}'"
 
     def set_robot_program_name(self, name):
-        """
-        Set the name of the robot program.
 
-        This method allows you to set the name of the robot program.
-
-        :param name: The name of the robot program.
-        :type name: str
-        """
         self._fail_if_not_connected()
-
-        length = HoldingReg.ROBOT_PROGRAM_NAME_END - HoldingReg.ROBOT_PROGRAM_NAME_START + 1
-        self.write_string_to_holding_regs(name, HoldingReg.ROBOT_PROGRAM_NAME_START, length)
+        self.write_string_to_holding_regs(name, HoldingReg.ROBOT_PROGRAM_NAME_START)
 
     def get_robot_program_name(self):
-        """
-        Get the name of the robot program.
 
-        This method reads the name of the robot program.
-
-        :return: The name of the robot program.
-        :rtype: str
-        """
         self._fail_if_not_connected()
 
-        length = HoldingReg.ROBOT_PROGRAM_NAME_END - HoldingReg.ROBOT_PROGRAM_NAME_START + 1
-        read = self.modbus_client.read_holding_registers(HoldingReg.ROBOT_PROGRAM_NAME_START, length)
-        return self.read_string(read)
+        int_list = self.modbus_client.read_holding_registers(HoldingReg.ROBOT_PROGRAM_NAME_START, 32)
+        return self.read_string(int_list)
 
+    def is_robot_program_loaded(self):
+        self._fail_if_not_connected()
+        return bool(self.modbus_client.read_coils(Coils.IS_ROBOT_PROGRAM_LOADED)[0])
+
+    def get_list_of_porgrams(self):
+        
+        self._fail_if_not_connected()
+
+        num_programs = self.modbus_client.read_input_registers(InputReg.NUMBER_OF_ENTRIES_IN_CURRENT_DIR)[0]
+
+        # Ensure that the list starts from the top by repeatedly navigating to the previous program
+        for _ in range(num_programs):
+            self._send_rising_edge(Coils.SELECT_PREVIOUS_DIR_ENTRY)
+
+        # Loop through the program indices
+        program_list = []
+        for _ in range(num_programs):
+            program_name = self.read_string(self.modbus_client.read_input_registers(InputReg.NAME_OF_SELECTED_DIRECTORY_ENTRY_START, 32))
+            # Remove null characters from the program name
+            program_name = str(program_name).replace("\x00", "")
+            program_list.append(program_name)
+            self._send_rising_edge(Coils.SELECT_NEXT_DIR_ENTRY)
+
+        return program_list
+
+    def get_number_of_loaded_robot_programs(self):
+
+        self._fail_if_not_connected()
+        return self.modbus_client.read_input_registers(InputReg.NUMBER_OF_LOADED_ROBOT_PROGRAMS)[0]
+
+    def get_number_of_current_robot_program(self):
+        self._fail_if_not_connected()
+        return self.modbus_client.read_input_registers(InputReg.NUMBER_OF_CURRENT_ROBOT_PROGRAM)[0]
+
+    # Errors and info functions =================================================================================================
+    def get_module_error_list(self):
+
+        self._fail_if_not_connected()
+        errors_list = []
+
+        if self.modbus_client.read_coils(Coils.MODULE_ERROR_NO_ERROR)[0]:
+            return []
+        if self.modbus_client.read_coils(Coils.MODULE_ERROR_TEMPERATURE)[0]:
+            errors_list.append("Temperature")
+        if self.modbus_client.read_coils(Coils.MODULE_ERROR_EMERGENCY_STOP)[0]:
+            errors_list.append("Emergency stop")
+        if self.modbus_client.read_coils(Coils.MODULE_ERROR_MOTOR_NOT_ACTIVATED)[0]:
+            errors_list.append("Motor not activated")
+        if self.modbus_client.read_coils(Coils.MODULE_ERROR_COMMUNICATION)[0]:
+            errors_list.append("Communication")
+        if self.modbus_client.read_coils(Coils.MODULE_ERROR_COUNTOURING)[0]:
+            errors_list.append("Contouring error")
+        if self.modbus_client.read_coils(Coils.MODULE_ERROR_ENCODER)[0]:
+            errors_list.append("Encoder error")
+        if self.modbus_client.read_coils(Coils.MODULE_ERROR_OVERCURRENT)[0]:
+            errors_list.append("Overcurrent")
+        if self.modbus_client.read_coils(Coils.MODULE_ERROR_DRIVER)[0]:
+            errors_list.append("Driver error")
+        if self.modbus_client.read_coils(Coils.MODULE_ERROR_BUS_DEAD)[0]:
+            errors_list.append("Bus dead")
+        if self.modbus_client.read_coils(Coils.MODULE_ERROR_MODULE_DEAD)[0]:
+            errors_list.append("Module dead")
+
+        return errors_list
+
+    def get_kinematics_error(self):
+
+        self._fail_if_not_connected()
+
+        error_code = self.modbus_client.read_input_registers(InputReg.KINEMATICS_ERROR_CODE)[0]
+        match error_code:
+            case 00: return "" # No error
+            case 13: return "Axis limit Min"
+            case 14: return "Axis limit max"
+            case 21: return "Central axis singularity"
+            case 22: return "Out of range"
+            case 23: return "Wrist singularity"
+            case 30: return "Virtual box violated in X+"
+            case 31: return "Virtual box violated in X-"
+            case 32: return "Virtual box violated in Y+"
+            case 33: return "Virtual box violated in Y-"
+            case 34: return "Virtual box violated in Z+"
+            case 35: return "Virtual box violated in Z-"
+            case 50: return "NAN in calculation"
+            case 90: return "Motion not allowed"
+            case 65535: return "Unknown error" #(0xFFFF)
+
+    def get_kinematics_error_list(self):
+
+        self._fail_if_not_connected()
+        errors_list = []
+
+        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_NO_ERROR)[0]:
+            return [] # No error
+        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_AXIS_LIMIT_MIN)[0]:
+            errors_list.append("Axis limit Min") 
+        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_AXIS_LIMIT_MAX)[0]:
+            errors_list.append("Axis limit Max")
+        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_CENTRAL_AXIS_SINGULARITY)[0]:
+            errors_list.append("Central axis singularity")
+        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_OUT_OF_RANGE)[0]:
+            errors_list.append("Out of range")
+        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_WRIST_SINGULARITY)[0]:
+            errors_list.append("Wrist singularity")
+        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_VIRTUAL_BOX_REACHED)[0]:
+            errors_list.append("Virtual box reached")
+        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_MOVEMENT_NOT_ALLOWED)[0]:
+            errors_list.append("Motion not allowed")
+        
+        return errors_list
+
+    def get_info_or_message(self):
+
+        self._fail_if_not_connected()
+        msg = self.modbus_client.read_holding_registers(InputReg.INFO_OR_ERROR_SHORT_MESSAGE_START, 32)
+        return self.read_string(msg)
+
+
+
+    # Reviewed but unused functions ====================================================================================
+
+    def is_zero_torque_available(self):
+        
+        self._fail_if_not_connected()
+        return bool(self.modbus_client.read_coils(Coils.IS_ZERO_TORQUE_AVAILABLE)[0])
+    
+    def is_zero_torque_enabled(self):
+        
+        self._fail_if_not_connected()
+        return bool(self.modbus_client.read_coils(Coils.ENABLE_ZERO_TORQUE)[0])
+
+    def set_zero_torque(self, enable:bool=True):
+        self._fail_if_not_connected()
+
+        # TODO check logic - may need to reference the robot after enabling zero torque
+        self.modbus_client.write_single_coil(Coils.ENABLE_ZERO_TORQUE, enable)
+        # if enable & (not self.is_zero_torque_enabled()):
+        #     self.client.write_single_coil(111, False)
+        #     self.client.write_single_coil(Coils.ENABLE_ZERO_TORQUE, True)
+        # elif not enable & (self.is_zero_torque_enabled()):
+        #     self.client.write_single_coil(111, False)
+        #     self.reset()
+        #     sleep(0.2)
+        #     self.enable()
 
     # Un-reviewed Functions ============================================================================================
-
-    def set_override_velocity(self, velocity:int=20):
-        """
-        Set the override velocity for robot movements.
-
-        This method allows you to adjust the velocity override for robot movements.
-        The `velocity` parameter specifies the desired velocity as a percentage (0-100),
-        with 100 being the maximum velocity. The default is 20%.
-
-        :param velocity: The desired velocity override as a percentage (0-100).
-        :type velocity: float
-        :return: None
-        """
-        self._fail_if_not_connected()
-
-        if 0 < velocity <= 100:
-            self.modbus_client.write_single_register(HoldingReg.MOVE_SPEED_OVERRIDE, velocity * 10)
-            return True
-        return False
-
 
     def has_general_error(self):
         # TODO this might not work, its just checking the no error bit
@@ -533,32 +501,6 @@ class DeltaRobot:
         
         return bool(self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_NO_ERROR)[0])
 
-    def get_number_of_loaded_programs(self):
-        """
-        Get the number of loaded programs on the Delta Robot.
-
-        This method reads the number of loaded programs on the Delta Robot and returns the count.
-
-        :return: The number of loaded programs.
-        :rtype: int
-        """
-        if not self.is_connected:
-            return 0
-        return self.modbus_client.read_input_registers(262)[0]
-
-    def get_number_of_current_program(self):
-        """
-        Get the number of currently active programs on the Delta Robot.
-
-        This method reads the number of currently active programs on the Delta Robot and returns the count.
-        Note: The main program is typically represented as program number 0.
-
-        :return: The number of currently active programs.
-        :rtype: int
-        """
-        if not self.is_connected:
-            return 0
-        return self.modbus_client.read_input_registers(263)[0]
 
     def set_global_signal(self, number: int, state: bool):
         """
@@ -851,113 +793,8 @@ class DeltaRobot:
         conversion = postion[15]
         return [axes, cartesian, orientation, conversion]
 
-    def get_info_message(self):
-        """
-        Get the information or error message from the Delta Robot.
-
-        This method reads the information or error message from the Delta Robot's control unit.
-        The message is typically a short text, similar to what is displayed on a manual control unit.
-
-        :return: The information or error message as a string.
-        :rtype: str
-        """
-        if not self.is_connected:
-            return ""
-        message = self.modbus_client.read_holding_registers(400, 32)
-        return self.read_string(message)
-
-    def get_robot_errors(self):
-        """
-        Get a list of error descriptions indicating the robot's current error states.
-
-        This method reads the status of various error-related coils on the robot controller
-        and returns a list of error descriptions if any errors are detected.
-
-        :return: A list of error descriptions or "No error" if there are no errors.
-        :rtype: list[str]
-        """
-        if not self.is_connected:
-            return []
-        errors_list = []
-
-        if not self.has_general_error():
-            errors_list.append("No error")
-        else:
-            if self.modbus_client.read_coils(21)[0]:
-                errors_list.append("Temperature")
-            if self.modbus_client.read_coils(22)[0]:
-                errors_list.append("Emergency stop")
-            if self.modbus_client.read_coils(23)[0]:
-                errors_list.append("Motor not activated")
-            if self.modbus_client.read_coils(24)[0]:
-                errors_list.append("Communication")
-            if self.modbus_client.read_coils(25)[0]:
-                errors_list.append("Contouring error")
-            if self.modbus_client.read_coils(26)[0]:
-                errors_list.append("Encoder error")
-            if self.modbus_client.read_coils(27)[0]:
-                errors_list.append("Overcurrent")
-            if self.modbus_client.read_coils(28)[0]:
-                errors_list.append("Driver error")
-            if self.modbus_client.read_coils(29)[0]:
-                errors_list.append("Bus dead")
-            if self.modbus_client.read_coils(30)[0]:
-                errors_list.append("Module dead")
-
-        return errors_list
-
-    def get_kinematics_error(self):
-
-        self._fail_if_not_connected()
-
-        error_code = self.modbus_client.read_input_registers(InputReg.KINEMATICS_ERROR_CODE)[0]
-        match error_code:
-            case 00: return "" # No error
-            case 13: return "Axis limit Min"
-            case 14: return "Axis limit max"
-            case 21: return "Central axis singularity"
-            case 22: return "Out of range"
-            case 23: return "Wrist singularity"
-            case 30: return "Virtual box violated in X+"
-            case 31: return "Virtual box violated in X-"
-            case 32: return "Virtual box violated in Y+"
-            case 33: return "Virtual box violated in Y-"
-            case 34: return "Virtual box violated in Z+"
-            case 35: return "Virtual box violated in Z-"
-            case 50: return "NAN in calculation"
-            case 90: return "Motion not allowed"
-            case 65535: return "Unknown error" #(0xFFFF)
-
-    def get_kinematics_error_from_coils(self):
-        """
-        Get the kinematics error description.
-
-        This method reads the kinematics error code from the robot controller and returns a human-readable description of the error.
-
-        :return: A string describing the kinematics error.
-        :rtype: str
-        """
-        self._fail_if_not_connected()
-
-        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_NO_ERROR)[0]:
-            return "no error"
-        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_AXIS_LIMIT_MIN)[0]:
-            return "Axis limit Min"
-        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_AXIS_LIMIT_MAX)[0]:
-            return "Axis limit Max"
-        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_CENTRAL_AXIS_SINGULARITY)[0]:
-            return "Central axis singularity"
-        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_OUT_OF_RANGE)[0]:
-            return "Out of range"
-        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_WRIST_SINGULARITY)[0]:
-            return "Wrist singularity"
-        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_VIRTUAL_BOX_REACHED)[0]:
-            return "Virtual box reached"
-        if self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_MOVEMENT_NOT_ALLOWED)[0]:
-            return "Motion not allowed"
-        else:
-            return "Out of range"
-
+    
+    
     def get_stop_reason_description(self):
         """
         Get a description of the reason for the robot's current stop condition.
@@ -1004,7 +841,7 @@ class DeltaRobot:
             return ""
         code = self.modbus_client.read_input_registers(96)[0]
         if code == 0:
-            return "Standerd - normal operation"
+            return "Standard - normal operation"
         if code == 1:
             return "Serious error, control must be restarted"
         if code == 2:
@@ -1012,40 +849,7 @@ class DeltaRobot:
         else:
             return ""
 
-    def get_list_of_porgrams(self):
-        """
-        Get a list of available robot programs.
-
-        This method retrieves a list of robot programs from the robot controller.
-        It communicates with the robot controller to gather program names.
-
-        :return: A list of program names.
-        :rtype: list
-        """
-        if not self.is_connected:
-            return []
-        program_list = []
-
-        num_programs = self.modbus_client.read_input_registers(331)[0]
-
-        # Ensure that the list starts from the top by repeatedly navigating to the previous program
-        for _ in range(num_programs):
-            self.modbus_client.write_single_coil(131, False)
-            self.modbus_client.write_single_coil(131, True)
-
-        # Loop through the program indices
-        for _ in range(num_programs):
-            program_name = self.read_string(self.modbus_client.read_input_registers(333, 32))
-            # Remove null characters from the program name
-            program_name = str(program_name).replace("\x00", "")
-            program_list.append(program_name)
-
-            # Trigger the robot controller to move to the next program
-            self.modbus_client.write_single_coil(130, False)
-            self.modbus_client.write_single_coil(130, True)
-
-        return program_list
-
+    
     def print_list_of_programs(self):
         """
         Print a list of available robot programs.
@@ -1099,100 +903,55 @@ class DeltaRobot:
 
 
 
-    #  Custom functions =======================================================================
-    def move_cartesian(self, x:int, y:int, z:int, velocity:int=None):
+    #  Utility functions =======================================================================
+    def move_cartesian(self, x:int, y:int, z:int, velocity:int=None, relative_to=None):
         self._fail_if_not_connected()
         
         if velocity:
             self.set_velocity(velocity)
 
-        # self.reset()
-        # self.reference()
         self.set_target_position_cart(x, y, z)
-        self.start_move_to_cartesian()
+        self.start_move_to_cartesian(relative_to=relative_to)
 
-
-    def move_circular(self, radius:int, step:float=0.5, start_angle:int=0, stop_angle:int=360):
-        """
-        Move the robot's end effector in a circular path.
-
-        This method moves the robot's end effector in a circular path in the X-Y plane.
-        The circular path is defined by a radius, and you can specify the step size, start angle, and stop angle.
-
-        :param radius: The radius of the circular path in millimeters.
-        :type radius: float
-        :param step: The step size in degrees for moving along the circular path (default is 0.5 degrees).
-        :type step: float
-        :param start_angle: The starting angle of the circular path in degrees (default is 0 degrees).
-        :type start_angle: float
-        :param stop_angle: The stopping angle of the circular path in degrees (default is 360 degrees).
-        :type stop_angle: float
-        """
+    def move_circular(self, radius:float, angle_step:float=0.5, start_angle:float=0, stop_angle:float=360):
         self._fail_if_not_connected()
         
         x_offset, y_offset, z_offset = self.get_target_position_cart()
-        for angle in linspace(start_angle, stop_angle, step):
+        for angle in linspace(start_angle, stop_angle, angle_step):
             x = radius * cos(radians(angle)) + x_offset
             y = radius * sin(radians(angle)) + y_offset
 
-            self.set_target_position_cart(int(x), int(y), z_offset)
+            self.set_target_position_cart(x, y, z_offset)
             self.start_move_to_cartesian()
 
-    def write_string_to_holding_regs(self, string, regs_address, length=32):
-        """
-        Write a string to a sequence of registers.
+    def write_string_to_holding_regs(self, string, regs_address):
 
-        This method allows you to write a string to a sequence of registers, starting from a specified address.
-
-        :param string: The string to write.
-        :type string: str
-        :param ad: The starting address to write the string.
-        :type ad: int
-        :param length: The maximum number of characters to write (default is 32).
-        :type length: int
-        """
         self._fail_if_not_connected()
+
+        # the string max length is 32 words (word = 16bits). Each character is 8 bits, so 64 is max length of string
+        length = 64
+
+        assert len(string) <= length, f"string to write must be {length} characters of fewer"
+
+        # if string is not full of characters, then fill it up with nulls
+        if len(string) < length:
+            padding = length - len(string)
+            string += "\x00" * padding
         
-        int_list = list(map(ord, string[:length]))
+        int_list = []
+        for i in range(0, length, 2): 
+            int_value =  ord(string[i+1]) << 8 | (ord(string[i]) & 0x00FF)
+            int_list.append(int_value)
+
+        assert len(int_list) == 32, "Int list must have 32 elements"
         self.modbus_client.write_multiple_registers(regs_address, int_list)
-        # string = iter(string)
-        # for count, i in enumerate(string):
-        #     if count == length:
-        #         break
-        #     try:
-        #         val = ord(next(string)) << 8 | ord(i)
-        #     except:
-        #         val = ord(i)
-        #     self.client.write_single_register(count + ad, val)
-
-    def read_string_from_holding_regs(self, regs_address, length):
-
-        int_list = self.modbus_client.read_holding_registers(regs_address, length)
-        return "".join(list(map(chr, int_list)))
-    
-    def read_string_from_input_regs(self, regs_address, length):
-
-        int_list = self.modbus_client.read_input_registers(regs_address, length)
-        return "".join(list(map(chr, int_list)))
 
     def read_string(self, int_list):
-        """
-        Read a string from a sequence of registers.
 
-        This method reads a string from a sequence of registers and returns the decoded string.
-
-        :param read: The sequence of registers containing the string data.
-        :type read: list
-        :return: The decoded string.
-        :rtype: str
-        """
         self._fail_if_not_connected()
 
-        return "".join(list(map(chr, int_list)))
-
-        # string = ""
-        # for i in read:
-        #     if i:
-        #         string += chr(i & 0x00FF)
-        #         string += chr(i >> 8)
-        # return string
+        # Each  input reg is a word (word = 16bits). Each character in the string is encoded in 8 bits.
+        # There are 2 characters in each word. 
+        # So for each word, the MSB and the LSB are converted to a char and concatenated.
+        return "".join(list(map(lambda int_val: chr(int_val & 0x00FF) + chr(int_val >> 8), int_list)))
+        

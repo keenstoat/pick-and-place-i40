@@ -34,6 +34,7 @@ The robot linux system can be accessed through SSH with:
 
 Read more [here](https://cpr-robots.com/download/TinyCtrl/Filezilla_Putty_EmbCtrlAccess.pdf)
 
+
 ## Robot start Up sequence
 
 Steps:
@@ -100,6 +101,22 @@ sudo ifconfig eth0 192.168.3.1/24
 ```
 
 This allows the Delta robot to be connected directly to the pi instead of the Technikum LAN. The robot is no longer accessible in the WLAN but it no longer has to be connected to a wall socket!
+
+## Using an SSH Tunnel to connect from your localhost to the Delta robot
+
+A RaspberryPi is used as PC to connect to the robot.
+
+Instead of connecting to the RaspberryPi and cloning the repo and working in it a tunnel can be used.
+
+The following command forwards your localhost 5020 port to the Delta robot's 502 port (modbus port) using the RaspberryPi as a jump server.
+
+```bash
+
+# genral form is: ssh -N -L localport:robotIpAddress:modbusPort username@raspberryPiIpAddress
+ssh -N -L 5020:192.168.3.11:502 charles@192.168.158.89 
+```
+
+Now, use `localhost` and `5020` as host and port in your delta robot's modbus address in your python code
 
 ## Python Runtime
 
