@@ -68,6 +68,10 @@ The register and coil addresses depend on the motion type, you will find them in
 
 > Read more [here](https://wiki.cpr-robots.com/index.php/Moving_Robots_via_Modbus)
 
+#### Range of movement
+
+The range of movement for the robot is depicted [here](https://www.igus.eu/ContentData/Products/Downloads/Delta%20Roboter%20DLE-DR-0050_DINA5_v2.pdf)
+
 # Gripper
 
 The gripper is part of the delta robot.

@@ -162,10 +162,6 @@ class DeltaRobot:
         #     sleep(0.2)
         #     self.enable()
 
-
-
-
-    
     def set_velocity(self, velocity:int):
         """
         Set the velocity of the Robot.
@@ -182,6 +178,70 @@ class DeltaRobot:
         self._fail_if_not_connected()
 
         self.modbus_client.write_single_register(HoldingReg.MOVE_TO_SPEED, velocity * 10)
+
+    # Cartesian movement functions =====================================================================================
+    
+    def set_target_position_cart(self, x:float, y:float, z:float):
+        
+        self._fail_if_not_connected()
+        
+        x = int(x * 100)
+        y = int(y * 100)
+        z = int(z * 100)
+
+        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_X_LSB, (x & 0x0000FFFF))
+        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_X_MSB, (x >> 16) & 0x0000FFFF)
+
+        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Y_LSB, (y & 0x0000FFFF))
+        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Y_MSB, (y >> 16) & 0x0000FFFF)
+
+        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Z_LSB, (z & 0x0000FFFF))
+        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Z_MSB, (z >> 16) & 0x0000FFFF)
+
+    def set_target_orientation_cart(self, a: float, b: float, c: float):
+        # TODO check if this function is needed - delta robot does not have orientation of the end effector
+        self._fail_if_not_connected()
+
+        a *= 100
+        b *= 100
+        c *= 100
+
+        self.modbus_client.write_single_register(HoldingReg.TARGET_ORIENTATION_CART_A_LSB, a)
+        self.modbus_client.write_single_register(HoldingReg.TARGET_ORIENTATION_CART_B_LSB, b)
+        self.modbus_client.write_single_register(HoldingReg.TARGET_ORIENTATION_CART_C_LSB, c)
+
+    def get_target_position_cart(self):
+
+        self._fail_if_not_connected()
+
+        x1 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_CART_X_LSB)[0]
+        x2 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_CART_X_MSB)[0]
+        y1 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_CART_Y_LSB)[0]
+        y2 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_CART_Y_MSB)[0]
+        z1 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_CART_Z_LSB)[0]
+        z2 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_CART_Z_MSB)[0]
+        # Combine the two 16-bit values into a 32-bit integer for each position
+        # Values are in units of 0.01mm, and have to be returned in units of 1mm
+        x1 = c_int32(x1 | (x2 << 16)).value / 100
+        y1 = c_int32(y1 | (y2 << 16)).value / 100
+        z1 = c_int32(z1 | (z2 << 16)).value / 100
+        return x1, y1, z1
+
+    def get_target_orientation_cart(self):
+        """
+        Get the orientation of the Delta Robot's end effector.
+
+        This method reads the orientation values from input registers and returns them.
+
+        :return: A list (a, b, c) representing the orientation values.
+        :rtype: list[float]
+        """
+        self._fail_if_not_connected()
+
+        a = self.modbus_client.read_input_registers(InputReg.TARGET_ORIENTATION_CART_A_LSB)[0] / 100
+        b = self.modbus_client.read_input_registers(InputReg.TARGET_ORIENTATION_CART_B_LSB)[0] / 100
+        c = self.modbus_client.read_input_registers(InputReg.TARGET_ORIENTATION_CART_C_LSB)[0] / 100
+        return a, b, c
 
     def start_move_to_cartesian(self, relative_to:str=None, max_delay_ms:int=10_000_000):
         """
@@ -221,97 +281,7 @@ class DeltaRobot:
         print("moved to > ", self.get_target_position_cart())
         return True
 
-    def set_target_position_cart(self, x:int, y:int, z:int):
-        """
-        Set the target position of the end effector in millimeters.
-
-        This method sets the target position of the end effector in millimeters. The position can be absolute or relative
-        to the base or to itself. To make the robot move to the specified position, use the 'move_endeffector' method.
-
-        :param x_val: The target X position in millimeters.
-        :type x_val: float
-        :param y_val: The target Y position in millimeters.
-        :type y_val: float
-        :param z_val: The target Z position in millimeters.
-        :type z_val: float
-        :return: None
-        """
-        self._fail_if_not_connected()
-        
-        # x,y,z are expected in mm. Holding register values are expected in units of 0.01mm.
-        x *= 100
-        y *= 100
-        z *= 100
-
-        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_X_LSB, (x & 0x0000FFFF))
-        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_X_MSB, (x >> 16) & 0x0000FFFF)
-
-        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Y_LSB, (y & 0x0000FFFF))
-        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Y_MSB, (y >> 16) & 0x0000FFFF)
-
-        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Z_LSB, (z & 0x0000FFFF))
-        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Z_MSB, (z >> 16) & 0x0000FFFF)
-
-    def set_target_orientation_cart(self, a: float, b: float, c: float):
-        """
-        Set the orientation of the end effector.
-
-        This method allows you to set the orientation of the robot's end effector by specifying the angles
-        'a_val', 'b_val', and 'c_val' for orientation around the X, Y, and Z axes, respectively.
-
-        :param a_val: The orientation angle around the X-axis in degrees.
-        :type a_val: float
-        :param b_val: The orientation angle around the Y-axis in degrees.
-        :type b_val: float
-        :param c_val: The orientation angle around the Z-axis in degrees.
-        :type c_val: float
-        :return: None
-        """
-        self._fail_if_not_connected()
-
-        a *= 100
-        b *= 100
-        c *= 100
-
-        self.modbus_client.write_single_register(HoldingReg.TARGET_ORIENTATION_CART_A_LSB, a)
-        self.modbus_client.write_single_register(HoldingReg.TARGET_ORIENTATION_CART_B_LSB, b)
-        self.modbus_client.write_single_register(HoldingReg.TARGET_ORIENTATION_CART_C_LSB, c)
-
-    def get_target_position_cart(self):
-        """
-        Get the Cartesian position of the Delta Robot's end effector.
-        """
-        self._fail_if_not_connected()
-
-        # Read the X, Y, and Z positions from input registers
-        x1 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_CART_X_LSB)[0]
-        x2 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_CART_X_MSB)[0]
-        y1 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_CART_Y_LSB)[0]
-        y2 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_CART_Y_MSB)[0]
-        z1 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_CART_Z_LSB)[0]
-        z2 = self.modbus_client.read_input_registers(InputReg.TARGET_POSITION_CART_Z_MSB)[0]
-        # Combine the two 16-bit values into a 32-bit integer for each position
-        # Values are in units of 0.01mm, and have to be returned in units of 1mm
-        x1 = c_int32(x1 | (x2 << 16)).value / 100
-        y1 = c_int32(y1 | (y2 << 16)).value / 100
-        z1 = c_int32(z1 | (z2 << 16)).value / 100
-        return x1, y1, z1
-
-    def get_target_orientation_cart(self):
-        """
-        Get the orientation of the Delta Robot's end effector.
-
-        This method reads the orientation values from input registers and returns them.
-
-        :return: A list (a, b, c) representing the orientation values.
-        :rtype: list[float]
-        """
-        self._fail_if_not_connected()
-
-        a = self.modbus_client.read_input_registers(InputReg.TARGET_ORIENTATION_CART_A_LSB)[0] / 100
-        b = self.modbus_client.read_input_registers(InputReg.TARGET_ORIENTATION_CART_B_LSB)[0] / 100
-        c = self.modbus_client.read_input_registers(InputReg.TARGET_ORIENTATION_CART_C_LSB)[0] / 100
-        return a, b, c
+    # Axis movement functions =====================================================================================
 
     def start_move_to_axes(self, relative:bool=False, max_delay_ms=5000):
         """
