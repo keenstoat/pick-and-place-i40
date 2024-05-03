@@ -12,35 +12,52 @@ def main():
     dr = DeltaRobot(delta_robot_ip_addr, port=delta_robot_port)
     if dr.is_connected:
 
-        print(dr.get_module_error_list())
-        print(dr.get_kinematics_error())
-        print("info or error: ", dr.get_info_or_message())
+        print("Has General Error       : ", dr.has_module_error())
+        print("Has Kinemat Error       : ", dr.has_kinematics_error())
+        print()
+        print("Module Error List   : ", dr.get_module_error_list())
+        print("Kino Error List     : ", dr.get_kinematics_error_list())
+        print("Kino error single   : ", dr.get_kinematics_error())
+        print("Info or error short : ", dr.get_info_or_message())
+        print()
 
-        dr.enable()
+        
+        
+        
         if not dr.is_referenced():
             print("Robot NOT referenced. Resetting now.")
             dr.reset()
+            dr.enable()
             if not dr.reference():
                 print("Coult NOT reference robot. Try again")
                 return
         print("Robot is referenced!")
 
+        dr.enable()
         dr.set_override_velocity(100)
-        dr.set_velocity(1000)
+        dr.set_velocity(200)
 
-        xyz = [
-            (150, 150, 200),
-            (-150, 150, 200),
-            (-150, -150, 200),
-            (150, -150, 200),
+        xyz_grip = [
+            {"xyz": (0,0,300), "g": (0, 0)},
+            {"g": (100, 180)},
+            {"xyz": (0,0,0)},
+            {"g": (70, 180)},
+            {"xyz": (0,0,200)},
         ]
 
-        for _ in range(10):
-            for i, coord in enumerate(xyz):
+        for _ in range(1):
+            for i, coord in enumerate(xyz_grip):
+                # input("..")
+                xyz = coord.get("xyz")
+                g = coord.get("g")
                 print()
-                print(f"{i} - move to {coord} ====================================")
-                dr.move_cartesian(*coord)
-                print("moved to > ", dr.get_target_position_cart())
+                print(f"{i} - move to   {xyz} ====================================")
+                print(f"{i} - griper to {g} ====================================")
+                if xyz:
+                    dr.move_cartesian(*xyz)
+                if g:
+                    dr.control_gripper(*g)
+                # print("moved to > ", dr.get_target_position_cart())
 
 
         

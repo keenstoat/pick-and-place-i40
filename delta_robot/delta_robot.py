@@ -376,7 +376,18 @@ class DeltaRobot:
         self._fail_if_not_connected()
         return self.modbus_client.read_input_registers(InputReg.NUMBER_OF_CURRENT_ROBOT_PROGRAM)[0]
 
-    # Errors and info functions =================================================================================================
+    # Errors and info functions ========================================================================================
+
+    def has_module_error(self):
+
+        self._fail_if_not_connected()
+        return not bool(self.modbus_client.read_coils(Coils.MODULE_ERROR_NO_ERROR)[0])
+
+    def has_kinematics_error(self):
+
+        self._fail_if_not_connected()
+        return not bool(self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_NO_ERROR)[0])
+
     def get_module_error_list(self):
 
         self._fail_if_not_connected()
@@ -459,6 +470,89 @@ class DeltaRobot:
         msg = self.modbus_client.read_holding_registers(InputReg.INFO_OR_ERROR_SHORT_MESSAGE_START, 32)
         return self.read_string(msg)
 
+    # Gripper ==========================================================================================================
+    def control_gripper(self, opening:int, orientation:int, signal:int=6):
+        """
+        Control the gripper using specified values and a Modbus signal.
+
+        :param opening: The value for the gripper opening.
+        :type opening: int
+        :param orientation: The value for the gripper orientation.
+        :type orientation: int
+        :param signal: The Modbus signal number to enable/disable gripper control.
+                       Default is 6.
+        :type signal: int
+        :return: True if the gripper control was successful, False otherwise.
+        :rtype: bool
+        """
+        self._fail_if_not_connected()
+
+        self.set_number_variables(15, opening)
+        self.set_number_variables(16, orientation)
+
+        self.set_global_signal(signal, True)
+        sleep(0.2)
+        self.set_global_signal(signal, False)
+
+
+    def is_gripper_moving(self):
+        return self.get_global_signal(7)
+
+
+    #  Utility functions =======================================================================
+
+    def move_cartesian(self, x:int, y:int, z:int, velocity:int=None, max_delay_ms=10_000_000, relative_to=None):
+        self._fail_if_not_connected()
+        
+        if velocity:
+            self.set_velocity(velocity)
+
+        self.set_target_position_cart(x, y, z)
+        self.start_move_to_cartesian(relative_to=relative_to, max_delay_ms=max_delay_ms)
+
+    def move_circular(self, radius:float, angle_step:float=0.5, start_angle:float=0, stop_angle:float=360):
+        self._fail_if_not_connected()
+        
+        x_offset, y_offset, z_offset = self.get_target_position_cart()
+        for angle in linspace(start_angle, stop_angle, angle_step):
+            x = radius * cos(radians(angle)) + x_offset
+            y = radius * sin(radians(angle)) + y_offset
+
+            self.set_target_position_cart(x, y, z_offset)
+            self.start_move_to_cartesian()
+
+    def write_string_to_holding_regs(self, string, regs_address):
+
+        self._fail_if_not_connected()
+
+        # the string max length is 32 words (word = 16bits). Each character is 8 bits, so 64 is max length of string
+        length = 64
+
+        assert len(string) <= length, f"string to write must be {length} characters of fewer"
+
+        # if string is not full of characters, then fill it up with nulls
+        if len(string) < length:
+            padding = length - len(string)
+            string += "\x00" * padding
+        
+        int_list = []
+        for i in range(0, length, 2): 
+            int_value =  ord(string[i+1]) << 8 | (ord(string[i]) & 0x00FF)
+            int_list.append(int_value)
+
+        assert len(int_list) == 32, "Int list must have 32 elements"
+        self.modbus_client.write_multiple_registers(regs_address, int_list)
+
+    def read_string(self, int_list):
+
+        self._fail_if_not_connected()
+
+        # Each  input reg is a word (word = 16bits). Each character in the string is encoded in 8 bits.
+        # There are 2 characters in each word. 
+        # So for each word, the MSB and the LSB are converted to a char and concatenated.
+        return "".join(list(map(lambda int_val: chr(int_val & 0x00FF) + chr(int_val >> 8), int_list)))
+        
+
 
 
     # Reviewed but unused functions ====================================================================================
@@ -489,18 +583,7 @@ class DeltaRobot:
 
     # Un-reviewed Functions ============================================================================================
 
-    def has_general_error(self):
-        # TODO this might not work, its just checking the no error bit
-        self._fail_if_not_connected()
-        
-        return bool(self.modbus_client.read_coils(Coils.MODULE_ERROR_NO_ERROR)[0])
-
-    def has_kinematics_error(self):
-        # TODO this might not work, its just checking the no error bit
-        self._fail_if_not_connected()
-        
-        return bool(self.modbus_client.read_coils(Coils.KINEMATICS_ERROR_NO_ERROR)[0])
-
+    
 
     def set_global_signal(self, number: int, state: bool):
         """
@@ -865,32 +948,7 @@ class DeltaRobot:
         for count, i in enumerate(list):
             print(count, i)
 
-    def control_gripper(self, opening: int, orientation: int, signal: int = 6):
-        """
-        Control the gripper using specified values and a Modbus signal.
-
-        :param opening: The value for the gripper opening.
-        :type opening: int
-        :param orientation: The value for the gripper orientation.
-        :type orientation: int
-        :param signal: The Modbus signal number to enable/disable gripper control.
-                       Default is 6.
-        :type signal: int
-        :return: True if the gripper control was successful, False otherwise.
-        :rtype: bool
-        """
-        if not self.is_connected:
-            return False
-        self.set_number_variables(15, opening)
-        self.set_number_variables(16, orientation)
-        self.set_global_signal(signal, True)
-        sleep(0.2)
-        self.set_global_signal(signal, False)
-        return True
-
-    def is_gripper_moving(self):
-        return self.get_global_signal(7)
-
+   
     def change_table_hight(self, direction: int = 0, movement_time: int = 0, signal: int = 6):
         if not self.is_connected:
             return False
@@ -903,55 +961,4 @@ class DeltaRobot:
 
 
 
-    #  Utility functions =======================================================================
-    def move_cartesian(self, x:int, y:int, z:int, velocity:int=None, relative_to=None):
-        self._fail_if_not_connected()
-        
-        if velocity:
-            self.set_velocity(velocity)
-
-        self.set_target_position_cart(x, y, z)
-        self.start_move_to_cartesian(relative_to=relative_to)
-
-    def move_circular(self, radius:float, angle_step:float=0.5, start_angle:float=0, stop_angle:float=360):
-        self._fail_if_not_connected()
-        
-        x_offset, y_offset, z_offset = self.get_target_position_cart()
-        for angle in linspace(start_angle, stop_angle, angle_step):
-            x = radius * cos(radians(angle)) + x_offset
-            y = radius * sin(radians(angle)) + y_offset
-
-            self.set_target_position_cart(x, y, z_offset)
-            self.start_move_to_cartesian()
-
-    def write_string_to_holding_regs(self, string, regs_address):
-
-        self._fail_if_not_connected()
-
-        # the string max length is 32 words (word = 16bits). Each character is 8 bits, so 64 is max length of string
-        length = 64
-
-        assert len(string) <= length, f"string to write must be {length} characters of fewer"
-
-        # if string is not full of characters, then fill it up with nulls
-        if len(string) < length:
-            padding = length - len(string)
-            string += "\x00" * padding
-        
-        int_list = []
-        for i in range(0, length, 2): 
-            int_value =  ord(string[i+1]) << 8 | (ord(string[i]) & 0x00FF)
-            int_list.append(int_value)
-
-        assert len(int_list) == 32, "Int list must have 32 elements"
-        self.modbus_client.write_multiple_registers(regs_address, int_list)
-
-    def read_string(self, int_list):
-
-        self._fail_if_not_connected()
-
-        # Each  input reg is a word (word = 16bits). Each character in the string is encoded in 8 bits.
-        # There are 2 characters in each word. 
-        # So for each word, the MSB and the LSB are converted to a char and concatenated.
-        return "".join(list(map(lambda int_val: chr(int_val & 0x00FF) + chr(int_val >> 8), int_list)))
-        
+   
