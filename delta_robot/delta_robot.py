@@ -9,9 +9,11 @@ from .registers import Coils, HoldingReg, InputReg
 
 
 class DeltaRobot:
+
+    MAX_TABLE_DISTANCE = 740 # table distance from the base to where the gripper is in the lowest position - constant
     is_connected = False
 
-    def __init__(self, modbus_ip_address:str, port:int=502):
+    def __init__(self, table_distance, modbus_ip_address:str, port:int=502):
         """
         Initialize a Robot instance and establish the communication
 
@@ -20,6 +22,8 @@ class DeltaRobot:
         :param port: The port for Modbus TCP communication (default is 502).
         :type port: int
         """
+
+        self.table_distance = table_distance # distance from the base of the robot to the table surface
         self.address = modbus_ip_address
         self.modbus_client = ModbusClient(host=modbus_ip_address, port=port, timeout=1)
         self.is_connected = self.modbus_client.open()
@@ -129,18 +133,6 @@ class DeltaRobot:
         return False
     
     def set_velocity(self, velocity:int):
-        """
-        Set the velocity of the Robot.
-
-        This method sets the velocity of the robot in millimeters per second.
-        For cartesian motions the value is set as a multiple of 1mm/s,
-        for joint motions it is a multiple of 1% (relative to the maximum velocity)
-        The actual motion speed also depends on the global override value (holding register 187).
-
-        :param velocity: The desired velocity in millimeters per second (or in percent).
-        :type velocity: float
-        :return: None
-        """
         self._fail_if_not_connected()
 
         self.modbus_client.write_single_register(HoldingReg.MOVE_TO_SPEED, velocity * 10)
@@ -209,14 +201,11 @@ class DeltaRobot:
         self._fail_if_not_connected()
 
         if relative_to is None:
-            self.modbus_client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN, False)
-            self.modbus_client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN, True)
+            self._send_rising_edge(Coils.START_MOVE_TO_CARTESIAN)
         elif relative_to == "base":
-            self.modbus_client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN_BASE, False)
-            self.modbus_client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN_BASE, True)
+            self._send_rising_edge(Coils.START_MOVE_TO_CARTESIAN_BASE)
         elif relative_to == "tool":
-            self.modbus_client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN_TOOL, False)
-            self.modbus_client.write_single_coil(Coils.START_MOVE_TO_CARTESIAN_TOOL, True)
+            self._send_rising_edge(Coils.START_MOVE_TO_CARTESIAN_TOOL)
         else:
             raise Exception("Relative to value must be None, 'base', or 'tool'")
         
@@ -503,6 +492,11 @@ class DeltaRobot:
 
     def move_cartesian(self, x:int, y:int, z:int, velocity:int=None, max_delay_ms=10_000_000, relative_to=None):
         self._fail_if_not_connected()
+
+        if relative_to is None:
+            z_limit = self.MAX_TABLE_DISTANCE - self.table_distance
+            if z < z_limit:
+                return
         
         if velocity:
             self.set_velocity(velocity)

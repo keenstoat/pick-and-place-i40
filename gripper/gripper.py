@@ -3,131 +3,120 @@
 from serial import Serial
 from time import time
 from sys import argv, exit
+from json import dumps, loads
 
 
 class Gripper:
-    is_connected: bool = False
-    orientation = 0
-    opening = 0
-    last_control_time = 0
 
-    def __init__(self, port:str = "/dev/ttyUSB0", baudrate:int = 115200, timeout:int = 1, movement_time: float = 1):
-        """
-        Initialize the Gripper instance.
+    MAX_OPENING_MM = 64
 
-        :param port: The serial port for communication (default is "/dev/ttyUSB0").
-        :type port: str
-        :param baudrate: The baud rate for serial communication (default is 115200).
-        :type baudrate: int
-        :param timeout: The timeout for serial communication (default is 1 second).
-        :type timeout: int
-        :param movement_time: The maximum movement time in seconds (default is 1 second).
-        :type movement_time: float
-        """
+    def __init__(self, port:str="/dev/ttyUSB0", baudrate:int=115200, timeout:int=1):
+        
         self.serial = Serial(port, baudrate, timeout=timeout)
-        self.orientation = 90
-        self.opening = 100
-        self.open_min = 90
-        self.open_max = 180
-        self.orient_min = 30
-        self.orient_max = 150
-        self.table_hight = 0
-
-        self.movement_time = movement_time
-        self.table_movement_time = 0
-        self.last_control_time = time()
-
 
     @property
     def is_connected(self):
         return self.serial.is_open
+
+    def wait_for_response(self, max_delay_ms=2000):
+
+        now = time()
+        timeout = now + max_delay_ms/1000
+        while not(result := self.serial.readall()): 
+            if time() > timeout:
+                return None
+        return loads(result.decode()) if result else None
     
-    def control(self, opening:int, orientation:int=None, table_hight:int=0):
-
+    def get_status(self):
         if not self.is_connected:
             return
         
-        if not (0 <= opening <= 100):
-            return False  # Opening value out of range
-        
-        if orientation is not None and not (0 <= orientation <= 180):
-            return False  # Orientation value out of range
+        commandJson = dumps({"action": "status"})
+        self.serial.write(commandJson.encode())
 
-        if self.opening == opening and self.orientation == orientation and self.table_hight == table_hight:
-            return True
+        return self.wait_for_response()
 
-        if orientation is None:
-            orientation = self.orientation
+    def get_openning(self):
+        return self.get_status()["opening"]
 
-        if self.opening == opening and self.orientation == orientation:
-            self.last_control_time = time()
-        else:
-            self.last_control_time = time() + self.movement_time
+    def get_rotation(self):
+        return self.get_status()["rotation"]
 
-        self.opening = opening
-        self.orientation = orientation
-
-        table_hight = int(table_hight)
-        self.table_hight = table_hight
-
-        opening = int((opening * (self.open_max - self.open_min) / 100) + self.open_min)
-        orientation = 180 - int(
-            (orientation * (self.orient_max - self.orient_min) / 180) + self.orient_min
-        )
-        if table_hight == 2:
-            table_hight = -1
-        pos = f"{opening} {orientation} {table_hight}\n"
-        print(pos)
-
-        self.serial.write(pos.encode())
-
-    def is_moving(self) -> bool:
-        """
-        Check if the gripper is still moving after the last control operation.
-
-        This method calculates the time since the last control operation and compares it with the maximum movement time.
-        If the time since the last control operation is less than the maximum movement time, it returns True,
-        indicating that the gripper is still moving. Otherwise, it returns False.
-
-        Additionally, if the delta robot is connected, it sets a global signal to indicate the gripper's movement state.
-
-        :return: True if the gripper is still moving, False otherwise.
-        :rtype: bool
-        """
-        time_since_last_control = time() - self.last_control_time
-        state = time_since_last_control < self.movement_time
-        if self.delta.is_connected:
-            self.delta.set_globale_signal(7, state)
-        return state
-
-    def open(self):
-        if not self.is_connected:
-            return
-        self.control(0)
-
-    def close(self):
-        if not self.is_connected:
-            return
-        self.control(100)
-
-    def rotate(self, degrees:int):
+    def open(self, percent:int, relative:bool=False):
         if not self.is_connected:
             return
         
-        if not (0 <= degrees <= 180):
-            return False  # Orientation value out of range
+        commandJson = dumps({"action": "open", "value": percent, "relative": relative})
+        self.serial.write(commandJson.encode())
 
-        self.control(self.opening, self.orientation)
+        return self.wait_for_response()
+    
+    def open_mm(self, millis:int, relative:bool=False):
+        if not self.is_connected:
+            return
+        
+        value = millis * 100 / Gripper.MAX_OPENING_MM
+
+        commandJson = dumps({"action": "open", "value": value, "relative": relative})
+        self.serial.write(commandJson.encode())
+
+        return self.wait_for_response()
+
+    def rotate(self, degrees:int, relative:bool=False):
+        if not self.is_connected:
+            return
+        
+        commandJson = dumps({"action": "rotate", "value": degrees, "relative": relative})
+        self.serial.write(commandJson.encode())
+
+        return self.wait_for_response()
+
+    def config(self, rotateMaxDelayMs=None, openMaxDelayMs=None):
+        if not self.is_connected:
+            return
+        
+        payload = {"action": "config"}
+
+        if rotateMaxDelayMs is not None:
+            payload["rotateMaxDelayMs"] = rotateMaxDelayMs
+
+        if openMaxDelayMs is not None:
+            payload["openMaxDelayMs"] = openMaxDelayMs
+
+
+        commandJson = dumps(payload)
+        self.serial.write(commandJson.encode())
+
+        return self.wait_for_response()
 
 if __name__ == "__main__":
+
+    # g = Gripper()
+    # for angle in range(0, 180, 10):
+    #     print("angle: ", angle)
+    #     print(g.rotate(angle))
+    #     print(g.get_status())
+
+    # exit(0)
+
     argv.pop(0)
     if not argv:
         exit(1)
 
-    degrees = int(argv[0])
+    action = argv.pop(0)
+    if argv:
+        value = int(argv.pop(0))
+        
+    rel = True if argv and argv.pop(0)=="true" else False
+    g = Gripper()
 
-    Gripper().rotate(degrees)
+    if action == "open": print(g.open(value, rel))
+    if action == "mm": print(g.open_mm(value, rel))
+    if action == "rotate": print(g.rotate(value, rel))
+    if action == "status": print(g.get_status())
+    if action == "opening": print(g.get_openning())
+    if action == "rotation": print(g.get_rotation())
 
-
-
-
+    if action == "rotateMaxDelayMs": print(g.config(rotateMaxDelayMs=value))
+    if action == "openMaxDelayMs": print(g.config(openMaxDelayMs=value))
+    
