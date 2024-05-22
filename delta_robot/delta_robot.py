@@ -10,20 +10,10 @@ from .registers import Coils, HoldingReg, InputReg
 
 class DeltaRobot:
 
-    MAX_TABLE_DISTANCE = 740 # table distance from the base to where the gripper is in the lowest position - constant
     is_connected = False
 
-    def __init__(self, table_distance, modbus_ip_address:str, port:int=502):
-        """
-        Initialize a Robot instance and establish the communication
+    def __init__(self, modbus_ip_address:str, port:int=502):
 
-        :param address: The IP address of the Robot.
-        :type address: str
-        :param port: The port for Modbus TCP communication (default is 502).
-        :type port: int
-        """
-
-        self.table_distance = table_distance # distance from the base of the robot to the table surface
         self.address = modbus_ip_address
         self.modbus_client = ModbusClient(host=modbus_ip_address, port=port, timeout=1)
         self.is_connected = self.modbus_client.open()
@@ -212,7 +202,6 @@ class DeltaRobot:
         if max_delay_ms > 0:
             timeout = time() + max_delay_ms/1000
             while self.is_moving() and time() < timeout:
-                self._log("moving to > ", self.get_target_position_cart())
                 sleep(0.1)
 
     # Axis movement functions ==========================================================================================
@@ -490,16 +479,16 @@ class DeltaRobot:
 
     #  Utility functions =======================================================================
 
-    def move_cartesian(self, x:int, y:int, z:int, velocity:int=None, max_delay_ms=10_000_000, relative_to=None):
+    def move_cartesian(self, x=None, y=None, z=None, velocity:int=None, max_delay_ms=10_000_000, relative_to=None):
         self._fail_if_not_connected()
 
-        if relative_to is None:
-            z_limit = self.MAX_TABLE_DISTANCE - self.table_distance
-            if z < z_limit:
-                return
-        
         if velocity:
             self.set_velocity(velocity)
+
+        current_x, current_y, current_z = self.get_target_position_cart()
+        x = current_x if x is None else x
+        y = current_y if y is None else y
+        z = current_z if z is None else z
 
         self.set_target_position_cart(x, y, z)
         self.start_move_to_cartesian(relative_to=relative_to, max_delay_ms=max_delay_ms)
@@ -512,8 +501,9 @@ class DeltaRobot:
             x = radius * cos(radians(angle)) + x_offset
             y = radius * sin(radians(angle)) + y_offset
 
-            self.set_target_position_cart(x, y, z_offset)
-            self.start_move_to_cartesian()
+            self.move_cartesian(x, y, z_offset)
+            sleep(0.5)
+
 
     def write_string_to_holding_regs(self, string, regs_address):
 

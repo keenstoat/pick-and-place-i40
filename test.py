@@ -1,67 +1,140 @@
 #!/usr/bin/env python3
 
 from delta_robot.delta_robot import DeltaRobot
+from gripper.gripper import Gripper
 from time import sleep
 
-# delta_robot_ip_addr = "192.168.3.11"
-delta_robot_ip_addr = "localhost"
-delta_robot_port = 5020
+import paramiko
 
-END_EFFECTOR_MAX_HEIGHT = 300
 
-def main():
+class Module:
+    ROBOT_BASE_TO_END_EFFECTOR_BASE_INITIAL_DISTANCE = 297 # mm
+    ROBOT_Z_RANGE = 300 # mm
+    GRIPPER_HEIGHT = 135 # mm
+    
+    def __init__(self, table_distance_from_robot_base, delta_robot_ip_addr, delta_robot_port):
 
-    table_distance = 600
-    dr = DeltaRobot(table_distance, delta_robot_ip_addr, port=delta_robot_port)
-    if dr.is_connected:
-        print("Has General Error       : ", dr.has_module_error())
-        print("Has Kinemat Error       : ", dr.has_kinematics_error())
+        # self.gripper = Gripper()
+        self.robot = DeltaRobot(delta_robot_ip_addr, port=delta_robot_port)
+        assert self.robot.is_connected, "DeltaRobot is not connected"
+
+        print("Has General Error       : ", self.robot.has_module_error())
+        print("Has Kinemat Error       : ", self.robot.has_kinematics_error())
         print()
-        print("Module Error List   : ", dr.get_module_error_list())
-        print("Kino Error List     : ", dr.get_kinematics_error_list())
-        print("Kino error single   : ", dr.get_kinematics_error())
-        print("Info or error short : ", dr.get_info_or_message())
+        print("Module Error List   : ", self.robot.get_module_error_list())
+        print("Kino Error List     : ", self.robot.get_kinematics_error_list())
+        print("Kino error single   : ", self.robot.get_kinematics_error())
+        print("Info or error short : ", self.robot.get_info_or_message())
         print()
 
-        if not dr.is_referenced():
+        if not self.robot.is_referenced():
             print("Robot NOT referenced. Resetting now.")
-            dr.reset()
+            self.robot.reset()
             print("Enabling motors now..")
-            dr.enable()
+            self.robot.enable()
             print("Referencing now..")
-            if not dr.reference():
-                print("Coult NOT reference robot. Try again")
+            if not self.robot.reference():
+                print("Coult NOT reference self.robot. Try again")
                 return
         print("Robot is referenced!")
 
-        dr.enable()
-        dr.set_override_velocity(100)
-        dr.set_velocity(500)
+        self.robot.enable()
+        self.robot.set_override_velocity(100)
+        self.robot.set_velocity(400)
+        self.robot.move_cartesian(x=0, y=0, z=self.ROBOT_Z_RANGE)
+        self.robot_lowest_position = self.get_robot_lowest_position(table_distance_from_robot_base)
 
-        xyz_grip = [
-            # {"xyz": (0,0,300), "g": (0, 0)},
-            # {"g": (100, 180)},
-            # {"xyz": (0,0,0)},
-            # {"g": (70, 180)},
-            {"xyz": (0, 177, END_EFFECTOR_MAX_HEIGHT-180)},
-        ]
+        self.open_mm(0)
+        self.rotate(90)
 
-        for _ in range(1):
-            for i, coord in enumerate(xyz_grip):
-                # input("..")
-                xyz = coord.get("xyz")
-                g = coord.get("g")
-                print()
-                print(f"{i} - move to   {xyz} ====================================")
-                print(f"{i} - griper to {g} ====================================")
-                if xyz:
-                    dr.move_cartesian(*xyz)
-                if g:
-                    dr.control_gripper(*g)
-                # print("moved to > ", dr.get_target_position_cart())
+    def get_robot_lowest_position(self, table_distance_from_robot_base):
+        self.table_distance_from_robot_base = table_distance_from_robot_base
 
-    else:
-        print("No Connection")
+        return self.ROBOT_BASE_TO_END_EFFECTOR_BASE_INITIAL_DISTANCE + self.ROBOT_Z_RANGE \
+            - self.table_distance_from_robot_base + self.GRIPPER_HEIGHT
 
-main()
+    # TODO this mocks the actual gripper code
+    def open_mm(self, value):
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect("192.168.158.89", username="charles", password="asdf123")
+        ssh.exec_command(f"sudo ./gripper.py mm {value}")
+        sleep(2)
+
+    # TODO this mocks the actual gripper code
+    def rotate(self, value):
+        ssh = paramiko.SSHClient()
+        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
+        ssh.connect("192.168.158.89", username="charles", password="asdf123")
+        ssh.exec_command(f"sudo ./gripper.py rotate {value}")
+
+    def step(self, msg):
+        # return
+        print(msg)
+
+    def pickup(self, x, y, object_width, object_height):
+        
+        z_ini = self.robot_lowest_position + object_height + 10 # mm
+
+        self.step("position above object")
+        self.robot.move_cartesian(x=x, y=y, z=z_ini)
+        
+        self.step("open gripper...")
+        # self.gripper.open_mm(object_width + 10)
+        self.open_mm(object_width + 10)
+
+        self.step("position to grab object")
+        self.robot.move_cartesian(z=self.robot_lowest_position + object_height//2 - 10)
+        
+        self.step("close gripper...")
+        # self.gripper.open_mm(object_width)
+        self.open_mm(object_width-5)
+
+        self.step("pick up object")
+        self.robot.move_cartesian(x=0, y=0, z=self.ROBOT_Z_RANGE)
+        
+    def place(self, x, y, object_width, object_height):
+        
+        z_ini = self.robot_lowest_position + object_height + 10 # mm
+
+        self.step("position to place object")
+        self.robot.move_cartesian(x=x, y=y, z=self.robot_lowest_position + object_height//2 - 10)
+        
+        self.step("open gripper...")
+        # self.gripper.open_mm(object_width + 10)
+        self.open_mm(object_width + 10)
+
+        self.step("position above object")
+        self.robot.move_cartesian(z=z_ini)
+
+        self.step("return to base position")
+        self.robot.move_cartesian(x=0, y=0, z=self.ROBOT_Z_RANGE)
+        
+        self.step("close gripper...")
+        # self.gripper.open_mm(object_width)
+        self.open_mm(0)
+
+        
+        
+        
+
+
+
+# _delta_robot_ip_addr = "192.168.3.11"
+_delta_robot_ip_addr = "localhost"
+_delta_robot_port = 5020
+_table_distance = 593
+module = Module(_table_distance, _delta_robot_ip_addr, _delta_robot_port)
+
+
+_w = 25
+_h = 100
+
+_x = 0
+_y = 100
+module.pickup(_x, _y, _w, _h)
+
+_x = 0
+_y = -100
+module.place(_x, _y, _w, _h)
 
