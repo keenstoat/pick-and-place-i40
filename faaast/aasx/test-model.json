@@ -1,0 +1,80 @@
+{
+  "assetAdministrationShells": [
+    {
+      "idShort": "PickAndPlaceAAS",
+      "id": "PickAndPlaceAAS",
+      "assetInformation": {
+        "assetKind": "Instance",
+        "globalAssetId": "PickAndPlaceAsset",
+        "assetType": ""
+      },
+      "submodels": [
+        {
+          "type": "ModelReference",
+          "keys": [
+            {
+              "type": "Submodel",
+              "value": "FunctionsSubModel"
+            }
+          ]
+        }
+      ],
+      "modelType": "AssetAdministrationShell"
+    }
+  ],
+  "submodels": [
+    {
+      "idShort": "FunctionsSubModel",
+      "id": "FunctionsSubModel",
+      "kind": "Instance",
+      "submodelElements": [
+        {
+          "category": "VARIABLE",
+          "idShort": "processedItemCount",
+          "valueType": "xs:integer",
+          "value": "0",
+          "modelType": "Property"
+        },
+        {
+          "category": "VARIABLE",
+          "idShort": "isAvailable",
+          "valueType": "xs:boolean",
+          "value": "true",
+          "modelType": "Property"
+        },
+        {
+          "idShort": "pickup",
+          "inputVariables": [
+            {
+              "value": {
+                "idShort": "xValue",
+                "valueType": "xs:float",
+                "modelType": "Property"
+              }
+            },
+            {
+              "value": {
+                "idShort": "yValue",
+                "valueType": "xs:float",
+                "modelType": "Property"
+              }
+            }
+          ],
+          "outputVariables": [
+            {
+              "value": {
+                "category": "VARIABLE",
+                "idShort": "result",
+                "valueType": "xs:string",
+                "modelType": "Property"
+              }
+            }
+          ],
+          "modelType": "Operation"
+        }
+      ],
+      "modelType": "Submodel"
+    }
+  ],
+  "conceptDescriptions": []
+}

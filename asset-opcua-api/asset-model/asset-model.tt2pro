@@ -1,0 +1,25 @@
+###########################
+# UaModeler Project File  #
+# Generated at 26.05.2024 #
+###########################
+
+PROJECTNAME = asset-model
+
+TEMPLATESET = ($TEMPLATES)/modeling/v1_0/t0/modeling.tt2set
+
+MODELS += ($MODELS)/Opc.Ua.NodeSet2.ua \
+    asset-model.ua
+
+COLORS = ($MODELS)/Opc.Ua.NodeSet2.ua: #0000ff\
+    asset-model.ua: #008000
+
+OUTPUTPATH = 
+
+GENERATE += asset-model.ua
+
+NODEACCESSINFOROLES += Administrator \
+    SecurityAdmin \
+    ConfigurationAdmin \
+    Operator \
+    Observer
+

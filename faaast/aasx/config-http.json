@@ -1,0 +1,46 @@
+{
+  "core": {
+    "assetConnectionRetryInterval": 1000
+  },
+  "endpoints": [
+    {
+      "@class": "de.fraunhofer.iosb.ilt.faaast.service.endpoint.opcua.OpcUaEndpoint",
+      "discoveryServerUrl": "opc.tcp://localhost:4840"
+    }
+  ],
+  "assetConnections": [
+    {
+      "@class": "de.fraunhofer.iosb.ilt.faaast.service.assetconnection.http.HttpAssetConnection",
+      "baseUrl": "http://host.docker.internal:8080",
+      "valueProviders": {
+        "[ModelRef](Submodel)FunctionsSubModel, (Property)processedItemCount": {
+          "format": "JSON",
+          "path": "/FunctionsSubModel/processedItemCount",
+          "template": "{\"data\" : \"${value}\"}",
+          "query": "$.data",
+          "writeMethod": "POST"
+        }
+      },
+      "subscriptionProviders": {
+        "[ModelRef](Submodel)FunctionsSubModel, (Property)processedItemCount": {
+          "format": "JSON",
+          "path": "/FunctionsSubModel/processedItemCount",
+          "interval": 100,
+          "method": "GET",
+          "query": "$.data"
+        }
+      },
+      "operationProviders": {
+        "[ModelRef](Submodel)FunctionsSubModel, (Operation)pickup": {
+          "format": "JSON",
+          "path": "/FunctionsSubModel/pickup",
+          "method": "POST",
+          "template": "{\"x\" : ${xValue}, \"y\" : ${yValue}}",
+          "queries": {
+            "result": "$.data"
+          }
+        }
+      }
+    }
+  ]
+}

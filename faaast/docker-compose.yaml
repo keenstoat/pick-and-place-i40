@@ -1,0 +1,14 @@
+version: '3.4'
+services:
+  faaast-opcua:
+    image: fraunhoferiosb/faaast-service
+    ports:
+      - 4840:4840
+    volumes:
+      - /home/charles/mii-repos/project-ss/faaast/aasx:/aasx
+    environment:
+      faaast_model: /aasx/test-model.aasx
+      faaast_config: /aasx/config-http.json
+      # faaast_loglevel_external: INFO
+      faaast_loglevel_faaast: DEBUG
+      # faaast_no_validation: ""

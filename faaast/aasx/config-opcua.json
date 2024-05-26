@@ -1,0 +1,33 @@
+{
+  "core": {
+    "assetConnectionRetryInterval": 1000
+  },
+  "endpoints": [
+    {
+      "@class": "de.fraunhofer.iosb.ilt.faaast.service.endpoint.opcua.OpcUaEndpoint",
+      "discoveryServerUrl": "opc.tcp://localhost:4840"
+    }
+  ],
+  "assetConnections": [
+    {
+      "@class": "de.fraunhofer.iosb.ilt.faaast.service.assetconnection.opcua.OpcUaAssetConnection",
+      "host": "opc.tcp://host.docker.internal:4841",
+      "valueProviders": {
+        "[ModelRef](Submodel)FunctionsSubModel, (Property)processedItemCount": {
+          "nodeId": "ns=2;i=6001"
+        }
+      },
+      "subscriptionProviders": {
+        "[ModelRef](Submodel)FunctionsSubModel, (Property)processedItemCount": {
+          "nodeId": "ns=2;i=6001",
+          "interval": 100
+        }
+      },
+      "operationProviders": {
+        "[ModelRef](Submodel)FunctionsSubModel, (Operation)pickup": {
+            "nodeId": "nsu=http://asset-api/;i=7001"
+        }
+      }
+    }
+  ]
+}

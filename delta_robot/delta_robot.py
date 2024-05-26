@@ -493,18 +493,6 @@ class DeltaRobot:
         self.set_target_position_cart(x, y, z)
         self.start_move_to_cartesian(relative_to=relative_to, max_delay_ms=max_delay_ms)
 
-    def move_circular(self, radius:float, angle_step:float=0.5, start_angle:float=0, stop_angle:float=360):
-        self._fail_if_not_connected()
-        
-        x_offset, y_offset, z_offset = self.get_target_position_cart()
-        for angle in linspace(start_angle, stop_angle, angle_step):
-            x = radius * cos(radians(angle)) + x_offset
-            y = radius * sin(radians(angle)) + y_offset
-
-            self.move_cartesian(x, y, z_offset)
-            sleep(0.5)
-
-
     def write_string_to_holding_regs(self, string, regs_address):
 
         self._fail_if_not_connected()

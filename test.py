@@ -8,9 +8,9 @@ import paramiko
 
 
 class Module:
-    ROBOT_BASE_TO_END_EFFECTOR_BASE_INITIAL_DISTANCE = 297 # mm
+    ROBOT_BASE_TO_END_EFFECTOR_BASE_INITIAL_DISTANCE = 290 # mm
     ROBOT_Z_RANGE = 300 # mm
-    GRIPPER_HEIGHT = 135 # mm
+    GRIPPER_HEIGHT = 140 # mm
     
     def __init__(self, table_distance_from_robot_base, delta_robot_ip_addr, delta_robot_port):
 
@@ -72,7 +72,7 @@ class Module:
         # return
         print(msg)
 
-    def pickup(self, x, y, object_width, object_height):
+    def pick(self, x, y, object_width, object_height):
         
         z_ini = self.robot_lowest_position + object_height + 10 # mm
 
@@ -123,7 +123,7 @@ class Module:
 # _delta_robot_ip_addr = "192.168.3.11"
 _delta_robot_ip_addr = "localhost"
 _delta_robot_port = 5020
-_table_distance = 593
+_table_distance = 600
 module = Module(_table_distance, _delta_robot_ip_addr, _delta_robot_port)
 
 
@@ -131,8 +131,8 @@ _w = 25
 _h = 100
 
 _x = 0
-_y = 100
-module.pickup(_x, _y, _w, _h)
+_y = -100
+module.pick(_x, _y, _w, _h)
 
 _x = 0
 _y = -100
