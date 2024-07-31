@@ -71,6 +71,29 @@
             }
           ],
           "modelType": "Operation"
+        },
+        {
+          "idShort": "rotate",
+          "inputVariables": [
+            {
+              "value": {
+                "idShort": "angle",
+                "valueType": "xs:positiveInteger",
+                "value": "",
+                "modelType": "Property"
+              }
+            }
+          ],
+          "outputVariables": [
+            {
+              "value": {
+                "idShort": "result",
+                "valueType": "xs:string",
+                "modelType": "Property"
+              }
+            }
+          ],
+          "modelType": "Operation"
         }
       ],
       "modelType": "Submodel"
