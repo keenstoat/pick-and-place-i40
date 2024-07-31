@@ -9,4 +9,4 @@ api.add_url_rule("/FunctionsSubModel/rotate", view_func=rotate, methods=['POST']
 
 
 if __name__ == '__main__':
-    api.run(port=8080)
+    api.run(host='0.0.0.0', port=8080)

@@ -1,6 +1,6 @@
 
 from flask import json, request
-import paramiko
+#import paramiko
 from gripper.gripper import Gripper
 
 def rotate():
