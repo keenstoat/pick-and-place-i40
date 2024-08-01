@@ -10,4 +10,8 @@ ssh -N -L 5020:192.168.3.11:502 charles@192.168.158.89
 
 
 sudo kill -9 $(ps -ef | grep -v grep | grep dockerd | awk '{print $2}')
+
+
+rsync -a --delete /home/charles/repos/project-ss/faaast charles@pi:project-ss
+rsync -a --delete /home/charles/repos/project-ss/integration charles@pi:project-ss
 ```
