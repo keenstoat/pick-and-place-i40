@@ -1,0 +1,7 @@
+services:
+  rest-api:
+    image: rest-api
+    ports:
+      - 8080:8080
+
+
