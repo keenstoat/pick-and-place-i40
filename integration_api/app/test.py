@@ -4,9 +4,6 @@ from delta_robot.delta_robot import DeltaRobot
 from gripper.gripper import Gripper
 from time import sleep
 
-import paramiko
-
-
 class Module:
     ROBOT_BASE_TO_END_EFFECTOR_BASE_INITIAL_DISTANCE = 290 # mm
     ROBOT_Z_RANGE = 300 # mm
@@ -14,7 +11,7 @@ class Module:
     
     def __init__(self, table_distance_from_robot_base, delta_robot_ip_addr, delta_robot_port):
 
-        # self.gripper = Gripper()
+        self.gripper = Gripper()
         self.robot = DeltaRobot(delta_robot_ip_addr, port=delta_robot_port)
         assert self.robot.is_connected, "DeltaRobot is not connected"
 
@@ -44,29 +41,14 @@ class Module:
         self.robot.move_cartesian(x=0, y=0, z=self.ROBOT_Z_RANGE)
         self.robot_lowest_position = self.get_robot_lowest_position(table_distance_from_robot_base)
 
-        self.open_mm(0)
-        self.rotate(90)
+        self.gripper.open_mm(0)
+        self.gripper.rotate(90)
 
     def get_robot_lowest_position(self, table_distance_from_robot_base):
         self.table_distance_from_robot_base = table_distance_from_robot_base
 
         return self.ROBOT_BASE_TO_END_EFFECTOR_BASE_INITIAL_DISTANCE + self.ROBOT_Z_RANGE \
             - self.table_distance_from_robot_base + self.GRIPPER_HEIGHT
-
-    # TODO this mocks the actual gripper code
-    def open_mm(self, value):
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect("192.168.158.89", username="charles", password="asdf123")
-        ssh.exec_command(f"sudo ./gripper.py mm {value}")
-        sleep(2)
-
-    # TODO this mocks the actual gripper code
-    def rotate(self, value):
-        ssh = paramiko.SSHClient()
-        ssh.set_missing_host_key_policy(paramiko.AutoAddPolicy())
-        ssh.connect("192.168.158.89", username="charles", password="asdf123")
-        ssh.exec_command(f"sudo ./gripper.py rotate {value}")
 
     def step(self, msg):
         # return
@@ -80,15 +62,13 @@ class Module:
         self.robot.move_cartesian(x=x, y=y, z=z_ini)
         
         self.step("open gripper...")
-        # self.gripper.open_mm(object_width + 10)
-        self.open_mm(object_width + 10)
+        self.gripper.open_mm(object_width + 10)
 
         self.step("position to grab object")
         self.robot.move_cartesian(z=self.robot_lowest_position + object_height//2 - 10)
         
         self.step("close gripper...")
-        # self.gripper.open_mm(object_width)
-        self.open_mm(object_width-5)
+        self.gripper.open_mm(object_width-5)
 
         self.step("pick up object")
         self.robot.move_cartesian(x=0, y=0, z=self.ROBOT_Z_RANGE)
@@ -101,8 +81,7 @@ class Module:
         self.robot.move_cartesian(x=x, y=y, z=self.robot_lowest_position + object_height//2 - 10)
         
         self.step("open gripper...")
-        # self.gripper.open_mm(object_width + 10)
-        self.open_mm(object_width + 10)
+        self.gripper.open_mm(object_width + 10)
 
         self.step("position above object")
         self.robot.move_cartesian(z=z_ini)
@@ -111,30 +90,24 @@ class Module:
         self.robot.move_cartesian(x=0, y=0, z=self.ROBOT_Z_RANGE)
         
         self.step("close gripper...")
-        # self.gripper.open_mm(object_width)
-        self.open_mm(0)
+        self.gripper.open_mm(0)
 
         
-        
-        
-
-
-
 # _delta_robot_ip_addr = "192.168.3.11"
-_delta_robot_ip_addr = "localhost"
-_delta_robot_port = 5020
-_table_distance = 600
+_delta_robot_ip_addr = "192.168.3.11"
+_delta_robot_port = 502
+_table_distance = 570
 module = Module(_table_distance, _delta_robot_ip_addr, _delta_robot_port)
 
 
 _w = 25
-_h = 100
+_h = 10
 
-_x = 0
+_x = -100
 _y = -100
 module.pick(_x, _y, _w, _h)
 
-_x = 0
-_y = -100
+_x = 100
+_y = 100
 module.place(_x, _y, _w, _h)
 

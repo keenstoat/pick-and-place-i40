@@ -1,0 +1,235 @@
+{
+  "idShort": "OperationalData",
+  "id": "OperationalData",
+  "kind": "Instance",
+  "submodelElements": [
+    {
+      "idShort": "apiStatus",
+      "inputVariables": [],
+      "outputVariables": [
+        {
+          "value": {
+            "idShort": "result",
+            "valueType": "xs:string",
+            "modelType": "Property"
+          }
+        }
+      ],
+      "modelType": "Operation"
+    },
+    {
+      "idShort": "isModuleInitialized",
+      "valueType": "xs:boolean",
+      "value": "false",
+      "modelType": "Property"
+    },
+    {
+      "idShort": "initializeModule",
+      "inputVariables": [
+        {
+          "value": {
+            "idShort": "tableDistanceFromRobotBase",
+            "valueType": "xs:float",
+            "modelType": "Property"
+          }
+        }
+      ],
+      "outputVariables": [
+        {
+          "value": {
+            "idShort": "result",
+            "valueType": "xs:string",
+            "modelType": "Property"
+          }
+        }
+      ],
+      "modelType": "Operation"
+    },
+    {
+      "idShort": "isModuleBusy",
+      "valueType": "xs:boolean",
+      "value": "false",
+      "modelType": "Property"
+    },
+    {
+      "idShort": "pickAndPlace",
+      "inputVariables": [
+        {
+          "value": {
+            "idShort": "xStart",
+            "valueType": "xs:float",
+            "modelType": "Property"
+          }
+        },
+        {
+          "value": {
+            "idShort": "yStart",
+            "valueType": "xs:float",
+            "modelType": "Property"
+          }
+        },
+        {
+          "value": {
+            "idShort": "xFinal",
+            "valueType": "xs:float",
+            "modelType": "Property"
+          }
+        },
+        {
+          "value": {
+            "idShort": "yFinal",
+            "valueType": "xs:float",
+            "modelType": "Property"
+          }
+        },
+        {
+          "value": {
+            "idShort": "objectHeight",
+            "valueType": "xs:float",
+            "modelType": "Property"
+          }
+        },
+        {
+          "value": {
+            "idShort": "objectWidth",
+            "valueType": "xs:float",
+            "modelType": "Property"
+          }
+        }
+      ],
+      "outputVariables": [
+        {
+          "value": {
+            "category": "VARIABLE",
+            "idShort": "result",
+            "valueType": "xs:string",
+            "modelType": "Property"
+          }
+        }
+      ],
+      "modelType": "Operation"
+    },
+    {
+      "idShort": "gripperFunctions",
+      "value": [
+        {
+          "idShort": "rotateGripper",
+          "inputVariables": [
+            {
+              "value": {
+                "idShort": "angle",
+                "valueType": "xs:nonNegativeInteger",
+                "value": "",
+                "modelType": "Property"
+              }
+            }
+          ],
+          "outputVariables": [
+            {
+              "value": {
+                "idShort": "result",
+                "valueType": "xs:string",
+                "modelType": "Property"
+              }
+            }
+          ],
+          "modelType": "Operation"
+        },
+        {
+          "idShort": "openGripper",
+          "inputVariables": [
+            {
+              "value": {
+                "idShort": "length",
+                "valueType": "xs:nonNegativeInteger",
+                "value": "",
+                "modelType": "Property"
+              }
+            }
+          ],
+          "outputVariables": [
+            {
+              "value": {
+                "idShort": "result",
+                "valueType": "xs:string",
+                "modelType": "Property"
+              }
+            }
+          ],
+          "modelType": "Operation"
+        }
+      ],
+      "modelType": "SubmodelElementCollection"
+    },
+    {
+      "idShort": "robotFunctions",
+      "value": [
+        {
+          "idShort": "isRobotMoving",
+          "valueType": "xs:boolean",
+          "value": "false",
+          "modelType": "Property"
+        },
+        {
+          "idShort": "moveRobot",
+          "inputVariables": [
+            {
+              "value": {
+                "idShort": "x",
+                "valueType": "xs:float",
+                "modelType": "Property"
+              }
+            },
+            {
+              "value": {
+                "idShort": "y",
+                "valueType": "xs:float",
+                "modelType": "Property"
+              }
+            },
+            {
+              "value": {
+                "idShort": "z",
+                "valueType": "xs:float",
+                "modelType": "Property"
+              }
+            }
+          ],
+          "outputVariables": [
+            {
+              "value": {
+                "idShort": "result",
+                "valueType": "xs:string",
+                "modelType": "Property"
+              }
+            }
+          ],
+          "modelType": "Operation"
+        }
+      ],
+      "modelType": "SubmodelElementCollection"
+    },
+    {
+      "idShort": "robotPosition",
+      "value": [
+        {
+          "idShort": "x",
+          "valueType": "xs:float",
+          "modelType": "Property"
+        },
+        {
+          "idShort": "y",
+          "valueType": "xs:float",
+          "modelType": "Property"
+        },
+        {
+          "idShort": "z",
+          "valueType": "xs:float",
+          "modelType": "Property"
+        }
+      ],
+      "modelType": "SubmodelElementCollection"
+    }
+  ],
+  "modelType": "Submodel"
+}

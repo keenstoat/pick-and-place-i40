@@ -1,0 +1,77 @@
+{
+    "core": {
+        "assetConnectionRetryInterval": 1000
+    },
+    "endpoints": [
+        {
+            "@class": "de.fraunhofer.iosb.ilt.faaast.service.endpoint.opcua.OpcUaEndpoint",
+            "discoveryServerUrl": "opc.tcp://localhost:4840",
+            "secondsTillShutdown": 20
+        }
+    ],
+    "assetConnections": [
+        {
+            "@class": "de.fraunhofer.iosb.ilt.faaast.service.assetconnection.http.HttpAssetConnection",
+            "baseUrl": "http://localhost:8080",
+            "valueProviders": {
+                "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)x": {
+                    "format": "JSON",
+                    "path": "/OperationalData/robotPosition",
+                    "template": "{\"data\" : {\"x\": ${value}}}",
+                    "writeMethod": "POST",
+                    "query": "$.data.x"
+                },
+                "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)y": {
+                    "format": "JSON",
+                    "path": "/OperationalData/robotPosition",
+                    "template": "{\"data\" : {\"y\": ${value}}}",
+                    "writeMethod": "POST",
+                    "query": "$.data.y"
+                },
+                "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)z": {
+                    "format": "JSON",
+                    "path": "/OperationalData/robotPosition",
+                    "template": "{\"data\" : {\"z\": ${value}}}",
+                    "writeMethod": "POST",
+                    "query": "$.data.z"
+                }
+            },
+            "subscriptionProviders": {
+                "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)x": {
+                    "format": "JSON",
+                    "path": "/OperationalData/robotPosition",
+                    "interval": "100",
+                    "query": "$.data.x"
+                }
+            },
+            "operationProviders": {
+                "[ModelRef](Submodel)FunctionsSubModel, (Operation)pickup": {
+                    "format": "JSON",
+                    "path": "/FunctionsSubModel/pickup",
+                    "method": "POST",
+                    "template": "{\"x\" : ${xValue}, \"y\" : ${yValue}}",
+                    "queries": {
+                        "result": "$.data"
+                    }
+                },
+                "[ModelRef](Submodel)FunctionsSubModel, (Operation)rotate": {
+                    "format": "JSON",
+                    "path": "/FunctionsSubModel/rotate",
+                    "method": "POST",
+                    "template": "{\"data\" : ${angle}}",
+                    "queries": {
+                        "result": "$.data"
+                    }
+                },
+                "[ModelRef](Submodel)FunctionsSubModel, (Operation)status": {
+                    "format": "JSON",
+                    "path": "/status",
+                    "method": "GET",
+                    "queries": {
+                        "result": "$.data"
+                    }
+                }
+            }
+        }
+    ]
+}

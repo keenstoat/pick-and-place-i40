@@ -1,4 +1,6 @@
-# Based on https://github.com/FraunhoferIOSB/FAAAST-Service/blob/v1.1.0/starter/Dockerfile
+# Docker image fraunhoferiosb/faaast-service does not have compatibility for linux/arm/v8 platform
+# This image based on https://github.com/FraunhoferIOSB/FAAAST-Service/blob/v1.1.0/starter/Dockerfile
+# but uses Raspbian as base image so it can be run in a Raspberry Pi
 
 FROM balenalib/raspberry-pi-debian:20240527
 
