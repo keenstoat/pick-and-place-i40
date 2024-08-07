@@ -116,13 +116,16 @@ def get_set_robot_speed():
     
 def move_robot():
  
-    xyz:dict = request.json["data"]
+    xyzs:dict = request.json["data"]
 
-    for coord, value in xyz.items():
-        xyz[coord] = float(value) if value.strip() else None
+    for coord, value in xyzs.items():
+        xyzs[coord] = float(value) if value.strip() else None
+    
+    if xyzs["speed"]:
+        xyzs["speed"] = int(xyzs["speed"])
 
     robot = DeltaRobot(DELTA_ROBOT_IP_ADDRESS, port=DELTA_ROBOT_PORT)
-    threading.Thread(target=robot.move_cartesian, args=[xyz["x"], xyz["y"], xyz["z"]]).start()
+    threading.Thread(target=robot.move_cartesian, args=[xyzs["x"], xyzs["y"], xyzs["z"], xyzs["speed"]]).start()
     response = {
         "data": ""
     }
