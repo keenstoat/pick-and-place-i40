@@ -9,7 +9,7 @@ services:
     volumes:
       - /home/charles/repos/project-ss/aas/faaast:/faaast
     environment:
-      faaast_model: /faaast/test-model.aasx
+      faaast_model: /faaast/pick-and-place.aasx
       faaast_config: /faaast/config-opcua-http.json
       faaast_loglevel_faaast: DEBUG
 

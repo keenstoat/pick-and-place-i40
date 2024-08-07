@@ -49,6 +49,11 @@ assetConnections:
         path: /OperationalData/isModuleBusy
         interval: 100
         query: $.data
+      "[ModelRef](Submodel)OperationalData, (Property)robotSpeed": 
+        format: JSON
+        path: /OperationalData/robotSpeed
+        interval: 100
+        query: $.data
       "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)x":
         format: JSON
         path: /OperationalData/robotPosition/x
@@ -87,7 +92,7 @@ assetConnections:
         format: JSON
         path: /OperationalData/moveRobot
         method: POST
-        template: '{"data": {"x": ${x}, "y": ${y}, "z": ${z} } }'
+        template: '{"data": {"x": ${x}, "y": ${y}, "z": ${z} }, "speed": ${speed} }'
         queries:
           result: $.data
 

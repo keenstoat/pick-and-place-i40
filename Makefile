@@ -21,7 +21,7 @@ cleanapi:
 buildapi:
 	cd ${INTEGRATION_API_DIR} && make build
 
-upapi:
+upapi: loadapi
 	cd ${INTEGRATION_API_DIR} && make up
 
 saveapi:
@@ -40,6 +40,8 @@ api: cleanapi buildapi saveapi sendapi
 
 cleanall:
 	docker rmi -f $$(docker images -aq)
+
 sync:
+	cp /mnt/c/Users/charles/Desktop/pick-and-place.aasx aas/faaast/.
 	rsync -a --delete ${PROJECT_ROOT}/ pi:${PROJECT_ROOT}/
 

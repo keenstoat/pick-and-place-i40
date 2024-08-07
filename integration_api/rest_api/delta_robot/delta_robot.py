@@ -122,11 +122,11 @@ class DeltaRobot:
     
     def set_speed(self, speed:int):
         self._fail_if_not_connected()
-        self.modbus_client.write_single_register(HoldingReg.MOVE_TO_SPEED, speed * 10)
+        self.modbus_client.write_single_register(HoldingReg.MOVE_TO_SPEED, int(speed) * 10)
 
     def get_speed(self):
         self._fail_if_not_connected()
-        return self.modbus_client.read_holding_registers(HoldingReg.MOVE_TO_SPEED)[0] / 10
+        return int(self.modbus_client.read_holding_registers(HoldingReg.MOVE_TO_SPEED)[0] / 10)
     
     
     # Cartesian movement functions =====================================================================================

@@ -58,8 +58,9 @@ def init_module():
 
             robot.enable()
             robot.set_override_velocity(100)
-            robot.set_speed(500)
+            robot.set_speed(200)
             robot.move_cartesian(x=0, y=0, z=ROBOT_Z_RANGE)
+            robot.set_speed(100)
 
             gripper.open_mm(0)
             gripper.rotate(90)
@@ -110,7 +111,7 @@ def get_set_robot_speed():
         return json.dumps(response), 200
 
     speed = request.json["data"]
-    robot.set_speed(int(speed))
+    robot.set_speed(speed)
     return '', 201
     
 def move_robot():

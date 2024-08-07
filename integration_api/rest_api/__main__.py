@@ -5,12 +5,6 @@ from api_functions import *
 
 api = Flask(__name__)
 
-
-
-# @api.route("/status", methods=['GET'])
-# def status():
-#     return '{"data": "status ok!"}', 200
-
 api.add_url_rule("/status", view_func=status, methods=['GET'])
 
 api.add_url_rule("/OperationalData/isModuleInitialized", view_func=is_module_initialized, methods=['GET'])

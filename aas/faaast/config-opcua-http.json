@@ -13,6 +13,23 @@
             "@class": "de.fraunhofer.iosb.ilt.faaast.service.assetconnection.http.HttpAssetConnection",
             "baseUrl": "http://localhost:8080",
             "valueProviders": {
+                "[ModelRef](Submodel)OperationalData, (Property)isModuleInitialized": {
+                    "format": "JSON",
+                    "path": "/OperationalData/isModuleInitialized",
+                    "query": "$.data"
+                },
+                "[ModelRef](Submodel)OperationalData, (Property)isModuleBusy": {
+                    "format": "JSON",
+                    "path": "/OperationalData/isModuleBusy",
+                    "query": "$.data"
+                },
+                "[ModelRef](Submodel)OperationalData, (Property)robotSpeed": {
+                    "format": "JSON",
+                    "path": "/OperationalData/robotSpeed",
+                    "template": "{\"data\": ${value} }",
+                    "writeMethod": "POST",
+                    "query": "$.data"
+                },
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)x": {
                     "format": "JSON",
                     "path": "/OperationalData/robotPosition/x",
@@ -26,15 +43,28 @@
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)z": {
                     "format": "JSON",
                     "path": "/OperationalData/robotPosition/z",
-                    "query": "$.data"
-                },
-                "[ModelRef](Submodel)OperationalData, (Property)isModuleBusy": {
-                    "format": "JSON",
-                    "path": "/OperationalData/isModuleBusy",
                     "query": "$.data"
                 }
             },
             "subscriptionProviders": {
+                "[ModelRef](Submodel)OperationalData, (Property)isModuleInitialized": {
+                    "format": "JSON",
+                    "path": "/OperationalData/isModuleInitialized",
+                    "interval": 100,
+                    "query": "$.data"
+                },
+                "[ModelRef](Submodel)OperationalData, (Property)isModuleBusy": {
+                    "format": "JSON",
+                    "path": "/OperationalData/isModuleBusy",
+                    "interval": 100,
+                    "query": "$.data"
+                },
+                "[ModelRef](Submodel)OperationalData, (Property)robotSpeed": {
+                    "format": "JSON",
+                    "path": "/OperationalData/robotSpeed",
+                    "interval": 100,
+                    "query": "$.data"
+                },
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)x": {
                     "format": "JSON",
                     "path": "/OperationalData/robotPosition/x",
@@ -50,48 +80,34 @@
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)z": {
                     "format": "JSON",
                     "path": "/OperationalData/robotPosition/z",
-                    "interval": 100,
-                    "query": "$.data"
-                },
-                "[ModelRef](Submodel)OperationalData, (Property)isModuleBusy": {
-                    "format": "JSON",
-                    "path": "/OperationalData/isModuleBusy",
                     "interval": 100,
                     "query": "$.data"
                 }
             },
             "operationProviders": {
-                "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotFunctions, (Operation)moveRobot": {
+                "[ModelRef](Submodel)OperationalData, (Operation)initializeModule": {
                     "format": "JSON",
-                    "path": "/OperationalData/robotFunctions/moveRobot",
+                    "path": "/OperationalData/initializeModule",
+                    "method": "POST",
+                    "template": "",
+                    "queries": {
+                        "result": "$.data"
+                    }
+                },
+                "[ModelRef](Submodel)OperationalData, (Operation)setTableDistance": {
+                    "format": "JSON",
+                    "path": "/OperationalData/setTableDistance",
+                    "method": "POST",
+                    "template": "{\"data\": ${tableDistanceFromRobotBase}}",
+                    "queries": {
+                        "result": "$.data"
+                    }
+                },
+                "[ModelRef](Submodel)OperationalData, (Operation)moveRobot": {
+                    "format": "JSON",
+                    "path": "/OperationalData/moveRobot",
                     "method": "POST",
                     "template": "{\"data\": {\"x\": ${x}, \"y\": ${y}, \"z\": ${z} } }",
-                    "queries": {
-                        "result": "$.data"
-                    }
-                },
-                "[ModelRef](Submodel)FunctionsSubModel, (Operation)pickup": {
-                    "format": "JSON",
-                    "path": "/FunctionsSubModel/pickup",
-                    "method": "POST",
-                    "template": "{\"x\" : ${xValue}, \"y\" : ${yValue}}",
-                    "queries": {
-                        "result": "$.data"
-                    }
-                },
-                "[ModelRef](Submodel)FunctionsSubModel, (Operation)rotate": {
-                    "format": "JSON",
-                    "path": "/FunctionsSubModel/rotate",
-                    "method": "POST",
-                    "template": "{\"data\" : ${angle}}",
-                    "queries": {
-                        "result": "$.data"
-                    }
-                },
-                "[ModelRef](Submodel)FunctionsSubModel, (Operation)status": {
-                    "format": "JSON",
-                    "path": "/status",
-                    "method": "GET",
                     "queries": {
                         "result": "$.data"
                     }
