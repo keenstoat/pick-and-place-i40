@@ -1,8 +1,8 @@
 FROM python:3.12.3-alpine
 
-COPY app /app
+COPY rest_api /rest_api
 
-WORKDIR /app
+WORKDIR /rest_api
 RUN pip install -r requirements.txt
 
 ENTRYPOINT ["python", "."]

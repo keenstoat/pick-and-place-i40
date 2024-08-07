@@ -33,6 +33,9 @@ sendapi:
 loadapi:
 	cd ${INTEGRATION_API_DIR} && make load
 
+api: cleanapi buildapi saveapi sendapi
+
+
 #=======================================================================================================================
 
 cleanall:

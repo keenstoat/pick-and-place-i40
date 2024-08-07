@@ -24,12 +24,70 @@
       "modelType": "Property"
     },
     {
+      "idShort": "isModuleBusy",
+      "valueType": "xs:boolean",
+      "value": "false",
+      "modelType": "Property"
+    },
+    {
+      "idShort": "robotPosition",
+      "value": [
+        {
+          "idShort": "x",
+          "valueType": "xs:float",
+          "modelType": "Property"
+        },
+        {
+          "idShort": "y",
+          "valueType": "xs:float",
+          "modelType": "Property"
+        },
+        {
+          "idShort": "z",
+          "valueType": "xs:float",
+          "modelType": "Property"
+        }
+      ],
+      "modelType": "SubmodelElementCollection"
+    },
+    {
       "idShort": "initializeModule",
+      "inputVariables": [],
+      "outputVariables": [
+        {
+          "value": {
+            "idShort": "result",
+            "valueType": "xs:string",
+            "modelType": "Property"
+          }
+        }
+      ],
+      "modelType": "Operation"
+    },
+    {
+      "idShort": "moveRobot",
       "inputVariables": [
         {
           "value": {
-            "idShort": "tableDistanceFromRobotBase",
-            "valueType": "xs:float",
+            "idShort": "x",
+            "description": [],
+            "valueType": "xs:string",
+            "modelType": "Property"
+          }
+        },
+        {
+          "value": {
+            "idShort": "y",
+            "description": [],
+            "valueType": "xs:string",
+            "modelType": "Property"
+          }
+        },
+        {
+          "value": {
+            "idShort": "z",
+            "description": [],
+            "valueType": "xs:string",
             "modelType": "Property"
           }
         }
@@ -44,12 +102,6 @@
         }
       ],
       "modelType": "Operation"
-    },
-    {
-      "idShort": "isModuleBusy",
-      "valueType": "xs:boolean",
-      "value": "false",
-      "modelType": "Property"
     },
     {
       "idShort": "pickAndPlace",
@@ -157,67 +209,6 @@
             }
           ],
           "modelType": "Operation"
-        }
-      ],
-      "modelType": "SubmodelElementCollection"
-    },
-    {
-      "idShort": "robotFunctions",
-      "value": [
-        {
-          "idShort": "isRobotMoving",
-          "valueType": "xs:boolean",
-          "value": "false",
-          "modelType": "Property"
-        },
-        {
-          "idShort": "moveRobot",
-          "inputVariables": [
-            {
-              "value": {
-                "idShort": "coordinates",
-                "description": [
-                  {
-                    "language": "en",
-                    "text": "comma separated values for x, y, and z. If one or more values need not be sent just leave blank. Example: 44.5, ,33.0 will move in x and z but not in y."
-                  }
-                ],
-                "valueType": "xs:string",
-                "modelType": "Property"
-              }
-            }
-          ],
-          "outputVariables": [
-            {
-              "value": {
-                "idShort": "result",
-                "valueType": "xs:string",
-                "modelType": "Property"
-              }
-            }
-          ],
-          "modelType": "Operation"
-        }
-      ],
-      "modelType": "SubmodelElementCollection"
-    },
-    {
-      "idShort": "robotPosition",
-      "value": [
-        {
-          "idShort": "x",
-          "valueType": "xs:float",
-          "modelType": "Property"
-        },
-        {
-          "idShort": "y",
-          "valueType": "xs:float",
-          "modelType": "Property"
-        },
-        {
-          "idShort": "z",
-          "valueType": "xs:float",
-          "modelType": "Property"
         }
       ],
       "modelType": "SubmodelElementCollection"

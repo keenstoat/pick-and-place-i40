@@ -120,11 +120,15 @@ class DeltaRobot:
             return True
         return False
     
-    def set_velocity(self, velocity:int):
+    def set_speed(self, speed:int):
         self._fail_if_not_connected()
+        self.modbus_client.write_single_register(HoldingReg.MOVE_TO_SPEED, speed * 10)
 
-        self.modbus_client.write_single_register(HoldingReg.MOVE_TO_SPEED, velocity * 10)
-
+    def get_speed(self):
+        self._fail_if_not_connected()
+        return self.modbus_client.read_holding_registers(HoldingReg.MOVE_TO_SPEED)[0] / 10
+    
+    
     # Cartesian movement functions =====================================================================================
     
     def set_target_position_cart(self, x:float=None, y:float=None, z:float=None):
@@ -478,16 +482,11 @@ class DeltaRobot:
 
     #  Utility functions =======================================================================
 
-    def move_cartesian(self, x:float=None, y:float=None, z:float=None, velocity:int=None, max_delay_ms=10_000_000, relative_to=None):
+    def move_cartesian(self, x:float=None, y:float=None, z:float=None, speed:int=None, max_delay_ms=10_000_000, relative_to=None):
         self._fail_if_not_connected()
 
-        if velocity:
-            self.set_velocity(velocity)
-
-        # current_x, current_y, current_z = self.get_target_position_cart()
-        # x = current_x if x is None else x
-        # y = current_y if y is None else y
-        # z = current_z if z is None else z
+        if speed:
+            self.set_speed(speed)
 
         self.set_target_position_cart(x, y, z)
         self.start_move_to_cartesian(relative_to=relative_to, max_delay_ms=max_delay_ms)
