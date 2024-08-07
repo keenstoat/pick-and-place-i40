@@ -127,22 +127,24 @@ class DeltaRobot:
 
     # Cartesian movement functions =====================================================================================
     
-    def set_target_position_cart(self, x:float, y:float, z:float):
+    def set_target_position_cart(self, x:float=None, y:float=None, z:float=None):
         
         self._fail_if_not_connected()
         
-        x = int(x * 100)
-        y = int(y * 100)
-        z = int(z * 100)
+        if x is not None:
+            x = int(x * 100)
+            self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_X_LSB, (x & 0x0000FFFF))
+            self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_X_MSB, (x >> 16) & 0x0000FFFF)
 
-        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_X_LSB, (x & 0x0000FFFF))
-        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_X_MSB, (x >> 16) & 0x0000FFFF)
+        if y is not None:
+            y = int(y * 100)
+            self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Y_LSB, (y & 0x0000FFFF))
+            self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Y_MSB, (y >> 16) & 0x0000FFFF)
 
-        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Y_LSB, (y & 0x0000FFFF))
-        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Y_MSB, (y >> 16) & 0x0000FFFF)
-
-        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Z_LSB, (z & 0x0000FFFF))
-        self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Z_MSB, (z >> 16) & 0x0000FFFF)
+        if z is not None:
+            z = int(z * 100)
+            self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Z_LSB, (z & 0x0000FFFF))
+            self.modbus_client.write_single_register(HoldingReg.TARGET_POSITION_CART_Z_MSB, (z >> 16) & 0x0000FFFF)
 
     def get_target_position_cart(self):
 
@@ -470,23 +472,22 @@ class DeltaRobot:
         sleep(0.2)
         self.set_global_signal(signal, False)
 
-
     def is_gripper_moving(self):
         return self.get_global_signal(7)
 
 
     #  Utility functions =======================================================================
 
-    def move_cartesian(self, x=None, y=None, z=None, velocity:int=None, max_delay_ms=10_000_000, relative_to=None):
+    def move_cartesian(self, x:float=None, y:float=None, z:float=None, velocity:int=None, max_delay_ms=10_000_000, relative_to=None):
         self._fail_if_not_connected()
 
         if velocity:
             self.set_velocity(velocity)
 
-        current_x, current_y, current_z = self.get_target_position_cart()
-        x = current_x if x is None else x
-        y = current_y if y is None else y
-        z = current_z if z is None else z
+        # current_x, current_y, current_z = self.get_target_position_cart()
+        # x = current_x if x is None else x
+        # y = current_y if y is None else y
+        # z = current_z if z is None else z
 
         self.set_target_position_cart(x, y, z)
         self.start_move_to_cartesian(relative_to=relative_to, max_delay_ms=max_delay_ms)

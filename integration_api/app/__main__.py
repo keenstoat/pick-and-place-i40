@@ -17,8 +17,12 @@ api.add_url_rule("/status", view_func=status, methods=['GET', 'POST'])
 
 # api.add_url_rule("/FunctionsSubModel/rotate", view_func=rotate, methods=['POST'])
 
-api.add_url_rule("/OperationalData/robotPosition", view_func=set_robot_position, methods=['GET', 'POST'])
-# api.add_url_rule("/FunctionsSubModel/moveTo", view_func=move_to, methods=['POST'])
+api.add_url_rule("/OperationalData/robotPosition/x", view_func=get_robot_position_xyz, methods=['GET'])
+api.add_url_rule("/OperationalData/robotPosition/y", view_func=get_robot_position_xyz, methods=['GET'])
+api.add_url_rule("/OperationalData/robotPosition/z", view_func=get_robot_position_xyz, methods=['GET'])
+
+api.add_url_rule("/OperationalData/isModuleBusy", view_func=is_module_busy, methods=['GET'])
+api.add_url_rule("/OperationalData/robotFunctions/moveRobot", view_func=move_robot, methods=['POST'])
 
 if __name__ == '__main__':
     api.run(host="0.0.0.0", port="8080")

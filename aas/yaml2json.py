@@ -2,6 +2,7 @@
 
 import yaml
 import json
+import sys
 
 # Function to convert YAML to JSON
 def yaml_to_json(yaml_filepath, json_filepath):
@@ -17,7 +18,7 @@ def yaml_to_json(yaml_filepath, json_filepath):
     except Exception as e:
         print(f"Error: {e}")
 
-# Example usage
-yaml_filepath = 'config-opcua-http.yaml'
-json_filepath = 'config-opcua-http.json'
+sys.argv.pop(0)
+yaml_filepath = sys.argv.pop(0)
+json_filepath = sys.argv.pop(0)
 yaml_to_json(yaml_filepath, json_filepath)

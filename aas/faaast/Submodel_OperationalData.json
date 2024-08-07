@@ -175,22 +175,14 @@
           "inputVariables": [
             {
               "value": {
-                "idShort": "x",
-                "valueType": "xs:float",
-                "modelType": "Property"
-              }
-            },
-            {
-              "value": {
-                "idShort": "y",
-                "valueType": "xs:float",
-                "modelType": "Property"
-              }
-            },
-            {
-              "value": {
-                "idShort": "z",
-                "valueType": "xs:float",
+                "idShort": "coordinates",
+                "description": [
+                  {
+                    "language": "en",
+                    "text": "comma separated values for x, y, and z. If one or more values need not be sent just leave blank. Example: 44.5, ,33.0 will move in x and z but not in y."
+                  }
+                ],
+                "valueType": "xs:string",
                 "modelType": "Property"
               }
             }

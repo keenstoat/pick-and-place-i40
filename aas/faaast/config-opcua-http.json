@@ -5,8 +5,7 @@
     "endpoints": [
         {
             "@class": "de.fraunhofer.iosb.ilt.faaast.service.endpoint.opcua.OpcUaEndpoint",
-            "discoveryServerUrl": "opc.tcp://localhost:4840",
-            "secondsTillShutdown": 20
+            "discoveryServerUrl": "opc.tcp://localhost:4840"
         }
     ],
     "assetConnections": [
@@ -16,35 +15,61 @@
             "valueProviders": {
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)x": {
                     "format": "JSON",
-                    "path": "/OperationalData/robotPosition",
-                    "template": "{\"data\" : {\"x\": ${value}}}",
-                    "writeMethod": "POST",
-                    "query": "$.data.x"
+                    "path": "/OperationalData/robotPosition/x",
+                    "query": "$.data"
                 },
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)y": {
                     "format": "JSON",
-                    "path": "/OperationalData/robotPosition",
-                    "template": "{\"data\" : {\"y\": ${value}}}",
-                    "writeMethod": "POST",
-                    "query": "$.data.y"
+                    "path": "/OperationalData/robotPosition/y",
+                    "query": "$.data"
                 },
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)z": {
                     "format": "JSON",
-                    "path": "/OperationalData/robotPosition",
-                    "template": "{\"data\" : {\"z\": ${value}}}",
-                    "writeMethod": "POST",
-                    "query": "$.data.z"
+                    "path": "/OperationalData/robotPosition/z",
+                    "query": "$.data"
+                },
+                "[ModelRef](Submodel)OperationalData, (Property)isModuleBusy": {
+                    "format": "JSON",
+                    "path": "/OperationalData/isModuleBusy",
+                    "query": "$.data"
                 }
             },
             "subscriptionProviders": {
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)x": {
                     "format": "JSON",
-                    "path": "/OperationalData/robotPosition",
-                    "interval": "100",
-                    "query": "$.data.x"
+                    "path": "/OperationalData/robotPosition/x",
+                    "interval": 100,
+                    "query": "$.data"
+                },
+                "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)y": {
+                    "format": "JSON",
+                    "path": "/OperationalData/robotPosition/y",
+                    "interval": 100,
+                    "query": "$.data"
+                },
+                "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)z": {
+                    "format": "JSON",
+                    "path": "/OperationalData/robotPosition/z",
+                    "interval": 100,
+                    "query": "$.data"
+                },
+                "[ModelRef](Submodel)OperationalData, (Property)isModuleBusy": {
+                    "format": "JSON",
+                    "path": "/OperationalData/isModuleBusy",
+                    "interval": 100,
+                    "query": "$.data"
                 }
             },
             "operationProviders": {
+                "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotFunctions, (Operation)moveRobot": {
+                    "format": "JSON",
+                    "path": "/OperationalData/robotFunctions/moveRobot",
+                    "method": "POST",
+                    "template": "{\"data\": {\"x\": ${x}, \"y\": ${y}, \"z\": ${z} } }",
+                    "queries": {
+                        "result": "$.data"
+                    }
+                },
                 "[ModelRef](Submodel)FunctionsSubModel, (Operation)pickup": {
                     "format": "JSON",
                     "path": "/FunctionsSubModel/pickup",
