@@ -14,20 +14,14 @@ assetConnections:
       "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)x": 
         format: JSON
         path: /OperationalData/robotPosition/x
-        # template: '{"data": ${value}}'
-        # writeMethod: POST
         query: $.data
       "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)y":
         format: JSON
         path: /OperationalData/robotPosition/y
-        # template: '{"data": ${value}}'
-        # writeMethod: POST
         query: $.data
       "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)z":
         format: JSON
         path: /OperationalData/robotPosition/z
-        # template: '{"data": ${value}}'
-        # writeMethod: POST
         query: $.data
       "[ModelRef](Submodel)OperationalData, (Property)isModuleBusy":
         format: JSON

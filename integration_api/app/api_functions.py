@@ -11,59 +11,64 @@ GRIPPER_HEIGHT = 140 # mm
 TABLE_DISTANCE_FROM_ROBOT_BASE = None
 
 
+DELTA_ROBOT_IP_ADDRESS = "192.168.3.11"
+DELTA_ROBOT_PORT = 502
+
+
 def status():
-    delay = 15
     response = {
          "data": "status ok!"
     }
-    def to_sleep(delay):
-        from time import sleep
-        print("SLEEP START!")
-        sleep(delay)
-        print("SLEEP STOP!")
+    return json.dumps(response), 200
 
-    threading.Thread(target=to_sleep, args=[delay]).start()
-    # to_sleep(delay)
-    return json.dumps(response), 202
+def is_module_initialized():
 
-def init_module(delta_robot_ip_addr, delta_robot_port):
+    robot = DeltaRobot(DELTA_ROBOT_IP_ADDRESS, port=DELTA_ROBOT_PORT)
+    response = {
+        "data": robot.is_enabled() and robot.is_referenced()
+    }
+    return json.dumps(response), 200
+
+def init_module():
         
-        gripper = Gripper()
-        robot = DeltaRobot(delta_robot_ip_addr, port=delta_robot_port)
-        assert robot.is_connected, "DeltaRobot is not connected"
+        def init():
+            gripper = Gripper()
+            robot = DeltaRobot(DELTA_ROBOT_IP_ADDRESS, port=DELTA_ROBOT_PORT)
+            assert robot.is_connected, "DeltaRobot is not connected"
 
-        print("Has General Error       : ", robot.has_module_error())
-        print("Has Kinemat Error       : ", robot.has_kinematics_error())
-        print()
-        print("Module Error List   : ", robot.get_module_error_list())
-        print("Kino Error List     : ", robot.get_kinematics_error_list())
-        print("Kino error single   : ", robot.get_kinematics_error())
-        print("Info or error short : ", robot.get_info_or_message())
-        print()
+            print("Has General Error       : ", robot.has_module_error())
+            print("Has Kinemat Error       : ", robot.has_kinematics_error())
+            print()
+            print("Module Error List   : ", robot.get_module_error_list())
+            print("Kino Error List     : ", robot.get_kinematics_error_list())
+            print("Kino error single   : ", robot.get_kinematics_error())
+            print("Info or error short : ", robot.get_info_or_message())
+            print()
 
-        if not robot.is_referenced():
-            print("Robot NOT referenced. Resetting now.")
-            robot.reset()
-            print("Enabling motors now..")
+            if not robot.is_referenced():
+                print("Robot NOT referenced. Resetting now.")
+                robot.reset()
+                print("Enabling motors now..")
+                robot.enable()
+                print("Referencing now..")
+                if not robot.reference():
+                    print("Coult NOT reference robot. Try again")
+                    return
+            print("Robot is referenced!")
+
             robot.enable()
-            print("Referencing now..")
-            if not robot.reference():
-                print("Coult NOT reference robot. Try again")
-                return
-        print("Robot is referenced!")
+            robot.set_override_velocity(100)
+            robot.set_velocity(500)
+            robot.move_cartesian(x=0, y=0, z=ROBOT_Z_RANGE)
 
-        robot.enable()
-        robot.set_override_velocity(100)
-        robot.set_velocity(500)
-        robot.move_cartesian(x=0, y=0, z=ROBOT_Z_RANGE)
+            gripper.open_mm(0)
+            gripper.rotate(90)
 
-        gripper.open_mm(0)
-        gripper.rotate(90)
-
+        threading.Thread(target=init, args=[]).start()
         response = {
             "data": ""
         }
-        return json.dumps(response), 201
+        return json.dumps(response), 202
 
 def set_table_distance():
 
@@ -77,78 +82,22 @@ def set_table_distance():
     }
     return json.dumps(response), 201
 
-def get_robot_lowest_position():
-    z = ROBOT_Z_RANGE - (TABLE_DISTANCE_FROM_ROBOT_BASE - ROBOT_BASE_TO_END_EFFECTOR_BASE_INITIAL_DISTANCE) + GRIPPER_HEIGHT
-
-    response = {
-         "data": z
-    }
-    return json.dumps(response), 200
-
-
-_is_module_busy = False
-target_position = {
-    "x": 0, "y": 0, "z": 0
-}
-
-real_position = {
-    "x": 0, "y": 0, "z": 0
-}
-
-# TODO this is a mock
-def set_target_position_cart(x:float=None, y:float=None, z:float=None):
-    if x is not None:
-        target_position["x"] = x
-
-    if y is not None:
-        target_position["y"] = y
-
-    if z is not None:
-        target_position["z"] = z
-
-# TODO this is a mock
-def get_target_position_cart():
-    return real_position["x"], real_position["y"], real_position["z"]
-
-# TODO this is a mock
-def move_cartesian(x:float=None, y:float=None, z:float=None):
-    global _is_module_busy
-    _is_module_busy = True
-    
-    set_target_position_cart(x, y, z)
-    delta_x = (target_position["x"] - real_position["x"])/10
-    delta_y = (target_position["y"] - real_position["y"])/10
-    delta_z = (target_position["z"] - real_position["z"])/10
-    for _ in range(10):
-        real_position["x"] += delta_x
-        real_position["y"] += delta_y
-        real_position["z"] += delta_z
-        sleep(1)
-    
-    _is_module_busy = False
-
-# POST must update the target position in holding registers
-# GET must return the target position in input registers
 def get_robot_position_xyz():
+
     coord = request.url.split("/")[-1]
 
-    if request.method == "GET":
-        x, y, z = get_target_position_cart()
-        response = {
-            "data": {"x": x, "y": y, "z": z}[coord]
-        }
-        return json.dumps(response), 200
+    robot = DeltaRobot(DELTA_ROBOT_IP_ADDRESS, port=DELTA_ROBOT_PORT)
+    x, y, z = robot.get_target_position_cart()
 
-    # # POST
-    # data = request.json['data']
-    # data = float(data)
-    # match coord:
-    #     case "x": set_target_position_cart(x=data)
-    #     case "y": set_target_position_cart(y=data)
-    #     case "z": set_target_position_cart(z=data)
+    data = {"x": x, "y": y, "z": z}
 
-    # return '', 201
-
+    if coord in ("x", "y", "z"):
+        data = data[coord]
+        
+    response = {
+        "data": data
+    }
+    return json.dumps(response), 200
 
 def move_robot():
  
@@ -157,16 +106,22 @@ def move_robot():
     for coord, value in xyz.items():
         xyz[coord] = float(value) if value.strip() else None
 
-    threading.Thread(target=move_cartesian, args=[xyz["x"], xyz["y"], xyz["z"]]).start()
+    robot = DeltaRobot(DELTA_ROBOT_IP_ADDRESS, port=DELTA_ROBOT_PORT)
+    threading.Thread(target=robot.move_cartesian, args=[xyz["x"], xyz["y"], xyz["z"]]).start()
     response = {
         "data": ""
     }
     return json.dumps(response), 202
 
-
 def is_module_busy():
 
+    robot = DeltaRobot(DELTA_ROBOT_IP_ADDRESS, port=DELTA_ROBOT_PORT)
     response = {
-        "data": _is_module_busy
+        "data": robot.is_moving()
     }
     return json.dumps(response), 200
+
+# aux functions ========================================================================================================
+
+def get_robot_lowest_position():
+    z = ROBOT_Z_RANGE - (TABLE_DISTANCE_FROM_ROBOT_BASE - ROBOT_BASE_TO_END_EFFECTOR_BASE_INITIAL_DISTANCE) + GRIPPER_HEIGHT

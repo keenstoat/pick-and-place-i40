@@ -1,47 +1,42 @@
 SHELL=bash
-FAAAST_DOCKER_IMAGE_NAME=faaast-server-arm
-REST_API_DOCKER_IMAGE_NAME=rest-api
 
 PROJECT_ROOT=/home/charles/repos/project-ss
+AAS_DIR=aas
+INTEGRATION_API_DIR=integration_api
 
-cleanfast:
-	cd aas && make clean
+cleanaas:
+	cd ${AAS_DIR} && make clean
 
-buildfast:
-	cd aas && make build
+buildaas:
+	cd ${AAS_DIR} && make build
 
-upfast:
-	cd aas && make up
-
-#=======================================================================================================================
-cleanrest:
-	docker rmi -f ${REST_API_DOCKER_IMAGE_NAME} || true
-
-buildrest:
-	cd ${PROJECT_ROOT}/integration && docker build --platform linux/arm/v8 -t ${REST_API_DOCKER_IMAGE_NAME} .
-
-uprest:
-	docker compose -f ${PROJECT_ROOT}/integration/docker-compose.yaml up
-
-saverest:
-	rm -rf /tmp/${REST_API_DOCKER_IMAGE_NAME}-file || true
-	docker save -o /tmp/${REST_API_DOCKER_IMAGE_NAME}-file ${REST_API_DOCKER_IMAGE_NAME}
-
-sendrest:
-	rsync -a --delete /tmp/${REST_API_DOCKER_IMAGE_NAME}-file pi:/tmp
-
-loadrest:
-	docker load -i /tmp/${REST_API_DOCKER_IMAGE_NAME}-file
-
-
+upaas:
+	cd ${AAS_DIR} && make up
 
 #=======================================================================================================================
 
-syncfast:
-	rsync -a --delete ${PROJECT_ROOT}/faaast pi:${PROJECT_ROOT}
+cleanapi:
+	cd ${INTEGRATION_API_DIR} && make clean
 
-syncint:
-	rsync -a --delete ${PROJECT_ROOT}/integration pi:${PROJECT_ROOT}
+buildapi:
+	cd ${INTEGRATION_API_DIR} && make build
 
-syncmake:
-	rsync -a --delete ${PROJECT_ROOT}/Makefile pi:${PROJECT_ROOT}
+upapi:
+	cd ${INTEGRATION_API_DIR} && make up
+
+saveapi:
+	cd ${INTEGRATION_API_DIR} && make save
+
+sendapi:
+	cd ${INTEGRATION_API_DIR} && make send
+
+loadapi:
+	cd ${INTEGRATION_API_DIR} && make load
+
+#=======================================================================================================================
+
+cleanall:
+	docker rmi -f $$(docker images -aq)
+sync:
+	rsync -a --delete ${PROJECT_ROOT}/ pi:${PROJECT_ROOT}/
+
