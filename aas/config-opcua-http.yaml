@@ -76,7 +76,7 @@ assetConnections:
         format: JSON
         path: /OperationalData/initializeModule
         method: POST
-        template: ''
+        template: '{"data": {"robotIpAddress": ${robotIpAddress}, "robotPort": ${robotPort} }}'
         queries:
           result: $.data
 

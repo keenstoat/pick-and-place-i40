@@ -5,7 +5,4 @@ services:
       - 8080:8080
     devices:
       - /dev/ttyUSB0:/dev/ttyUSB0
-    environment:
-      DELTA_MODBUSTCP_IP_ADDRESS: 192.168.3.11
-      DELTA_MODBUSTCP_PORT: 502
 

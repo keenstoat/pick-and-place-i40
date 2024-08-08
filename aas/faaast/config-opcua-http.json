@@ -107,7 +107,7 @@
                     "format": "JSON",
                     "path": "/OperationalData/moveRobot",
                     "method": "POST",
-                    "template": "{\"data\": {\"x\": ${x}, \"y\": ${y}, \"z\": ${z} } }",
+                    "template": "{\"data\": {\"x\": ${x}, \"y\": ${y}, \"z\": ${z}, \"speed\": ${speed} }}",
                     "queries": {
                         "result": "$.data"
                     }

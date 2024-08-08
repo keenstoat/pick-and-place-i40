@@ -31,9 +31,9 @@ def is_module_initialized():
 
 def init_module():
         
-        def init():
+        def init(robot_ip_address, robot_port):
             gripper = Gripper()
-            robot = DeltaRobot(DELTA_ROBOT_IP_ADDRESS, port=DELTA_ROBOT_PORT)
+            robot = DeltaRobot(robot_ip_address, port=robot_port)
             assert robot.is_connected, "DeltaRobot is not connected"
 
             print("Has General Error       : ", robot.has_module_error())
@@ -62,10 +62,13 @@ def init_module():
             robot.move_cartesian(x=0, y=0, z=ROBOT_Z_RANGE)
             robot.set_speed(100)
 
-            gripper.open_mm(0)
+            gripper.open(0)
             gripper.rotate(90)
 
-        threading.Thread(target=init, args=[]).start()
+        data = request.json["data"]
+        robot_ip_address = data.get("robotIpAddress", DELTA_ROBOT_IP_ADDRESS)
+        robot_port = int(data.get("robotPort", DELTA_ROBOT_PORT))
+        threading.Thread(target=init, args=[robot_ip_address, robot_port]).start()
         response = {
             "data": ""
         }

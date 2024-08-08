@@ -42,7 +42,7 @@ class Gripper:
     def get_rotation(self):
         return self.get_status()["rotation"]
 
-    def open(self, percent:int, relative:bool=False):
+    def open_percent(self, percent:int, relative:bool=False):
         if not self.is_connected:
             return
         
@@ -51,7 +51,7 @@ class Gripper:
 
         return self.wait_for_response()
     
-    def open_mm(self, millis:int, relative:bool=False):
+    def open(self, millis:int, relative:bool=False):
         if not self.is_connected:
             return
         
@@ -91,14 +91,6 @@ class Gripper:
 
 if __name__ == "__main__":
 
-    # g = Gripper()
-    # for angle in range(0, 180, 10):
-    #     print("angle: ", angle)
-    #     print(g.rotate(angle))
-    #     print(g.get_status())
-
-    # exit(0)
-
     argv.pop(0)
     if not argv:
         exit(1)
@@ -110,8 +102,8 @@ if __name__ == "__main__":
     rel = True if argv and argv.pop(0)=="true" else False
     g = Gripper()
 
-    if action == "open": print(g.open(value, rel))
-    if action == "mm": print(g.open_mm(value, rel))
+    if action == "open": print(g.open_percent(value, rel))
+    if action == "mm": print(g.open(value, rel))
     if action == "rotate": print(g.rotate(value, rel))
     if action == "status": print(g.get_status())
     if action == "opening": print(g.get_openning())

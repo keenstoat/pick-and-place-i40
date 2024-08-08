@@ -452,35 +452,7 @@ class DeltaRobot:
         msg = self.modbus_client.read_holding_registers(InputReg.INFO_OR_ERROR_SHORT_MESSAGE_START, 32)
         return self.read_string(msg)
 
-    # Gripper ==========================================================================================================
-    def control_gripper(self, opening:int, orientation:int, signal:int=6):
-        """
-        Control the gripper using specified values and a Modbus signal.
-
-        :param opening: The value for the gripper opening.
-        :type opening: int
-        :param orientation: The value for the gripper orientation.
-        :type orientation: int
-        :param signal: The Modbus signal number to enable/disable gripper control.
-                       Default is 6.
-        :type signal: int
-        :return: True if the gripper control was successful, False otherwise.
-        :rtype: bool
-        """
-        self._fail_if_not_connected()
-
-        self.set_number_variables(15, opening)
-        self.set_number_variables(16, orientation)
-
-        self.set_global_signal(signal, True)
-        sleep(0.2)
-        self.set_global_signal(signal, False)
-
-    def is_gripper_moving(self):
-        return self.get_global_signal(7)
-
-
-    #  Utility functions =======================================================================
+#  Utility functions =======================================================================
 
     def move_cartesian(self, x:float=None, y:float=None, z:float=None, speed:int=None, max_delay_ms=10_000_000, relative_to=None):
         self._fail_if_not_connected()
@@ -552,8 +524,6 @@ class DeltaRobot:
         #     self.enable()
 
     # Un-reviewed Functions ============================================================================================
-
-    
 
     def set_global_signal(self, number: int, state: bool):
         """
@@ -846,8 +816,6 @@ class DeltaRobot:
         conversion = postion[15]
         return [axes, cartesian, orientation, conversion]
 
-    
-    
     def get_stop_reason_description(self):
         """
         Get a description of the reason for the robot's current stop condition.
@@ -902,7 +870,6 @@ class DeltaRobot:
         else:
             return ""
 
-    
     def print_list_of_programs(self):
         """
         Print a list of available robot programs.
@@ -917,18 +884,3 @@ class DeltaRobot:
         list = self.get_list_of_porgrams()
         for count, i in enumerate(list):
             print(count, i)
-
-   
-    def change_table_hight(self, direction: int = 0, movement_time: int = 0, signal: int = 6):
-        if not self.is_connected:
-            return False
-        self.set_number_variables(13, direction)
-        self.set_number_variables(14, movement_time)
-        self.set_global_signal(signal, True)
-        sleep(0.2)
-        self.set_global_signal(signal, False)
-        return True
-
-
-
-   
