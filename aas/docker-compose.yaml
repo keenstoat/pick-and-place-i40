@@ -1,7 +1,7 @@
 services:
   aas-opcua-http: #TODO change this
-    # image: fraunhoferiosb/faaast-service:1.1 
-    image: faaast-server-arm:1.1.0
+    image: fraunhoferiosb/faaast-service:1.1 
+    # image: faaast-server-arm:1.1.0
     ports:
       - 4840:4840
     extra_hosts:
