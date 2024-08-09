@@ -37,6 +37,14 @@ assetConnections:
         format: JSON
         path: /OperationalData/robotPosition/z
         query: $.data
+      "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)gripperPosition, (Property)opening": 
+        format: JSON
+        path: /OperationalData/gripperPosition/opening
+        query: $.data
+      "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)gripperPosition, (Property)rotation": 
+        format: JSON
+        path: /OperationalData/gripperPosition/rotation
+        query: $.data
     
     subscriptionProviders:
       "[ModelRef](Submodel)OperationalData, (Property)isModuleInitialized": 
@@ -69,6 +77,16 @@ assetConnections:
         path: /OperationalData/robotPosition/z
         interval: 100
         query: $.data
+      "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)gripperPosition, (Property)opening": 
+        format: JSON
+        path: /OperationalData/gripperPosition/opening
+        interval: 100
+        query: $.data
+      "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)gripperPosition, (Property)rotation": 
+        format: JSON
+        path: /OperationalData/gripperPosition/rotation
+        interval: 100
+        query: $.data
     
     operationProviders:
 
@@ -79,7 +97,6 @@ assetConnections:
         template: '{"data": {"robotIpAddress": ${robotIpAddress}, "robotPort": ${robotPort} }}'
         queries:
           result: $.data
-
       "[ModelRef](Submodel)OperationalData, (Operation)setTableDistance":
         format: JSON
         path: /OperationalData/setTableDistance
@@ -87,7 +104,6 @@ assetConnections:
         template: '{"data": ${tableDistanceFromRobotBase}}'
         queries:
           result: $.data
-
       "[ModelRef](Submodel)OperationalData, (Operation)moveRobot":
         format: JSON
         path: /OperationalData/moveRobot
@@ -95,7 +111,13 @@ assetConnections:
         template: '{"data": {"x": ${x}, "y": ${y}, "z": ${z}, "speed": ${speed} }}'
         queries:
           result: $.data
-
+      "[ModelRef](Submodel)OperationalData, (Operation)moveGripper":
+        format: JSON
+        path: /OperationalData/moveGripper
+        method: POST
+        template: '{"data": {"opening": ${opening}, "rotation": ${rotation} }}'
+        queries:
+          result: $.data
       "[ModelRef](Submodel)OperationalData, (Operation)pickAndPlace":
         format: JSON
         path: /OperationalData/pickAndPlace
@@ -108,14 +130,7 @@ assetConnections:
           }}
         queries:
           result: $.data
-
-      # "[ModelRef](Submodel)FunctionsSubModel, (Operation)rotate":
-      #   format: JSON
-      #   path: /FunctionsSubModel/rotate
-      #   method: POST
-      #   template: '{"data" : ${angle}}'
-      #   queries:
-      #     result: $.data
+      
       # "[ModelRef](Submodel)FunctionsSubModel, (Operation)status":
       #   format: JSON
       #   path: /status

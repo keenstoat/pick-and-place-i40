@@ -16,9 +16,14 @@ api.add_url_rule("/OperationalData/robotPosition/x", view_func=get_robot_positio
 api.add_url_rule("/OperationalData/robotPosition/y", view_func=get_robot_position_xyz, methods=['GET'])
 api.add_url_rule("/OperationalData/robotPosition/z", view_func=get_robot_position_xyz, methods=['GET'])
 
+api.add_url_rule("/OperationalData/gripperPosition",          view_func=get_gripper_position, methods=['GET'])
+api.add_url_rule("/OperationalData/gripperPosition/opening",  view_func=get_gripper_position, methods=['GET'])
+api.add_url_rule("/OperationalData/gripperPosition/rotation", view_func=get_gripper_position, methods=['GET'])
+
 api.add_url_rule("/OperationalData/initializeModule", view_func=initialize_module, methods=['POST'])
 api.add_url_rule("/OperationalData/setTableDistance", view_func=set_table_distance, methods=['POST'])
 api.add_url_rule("/OperationalData/moveRobot", view_func=move_robot, methods=['POST'])
+api.add_url_rule("/OperationalData/moveGripper", view_func=move_gripper, methods=['POST'])
 api.add_url_rule("/OperationalData/pickAndPlace", view_func=pick_and_place, methods=['POST'])
 
 if __name__ == '__main__':

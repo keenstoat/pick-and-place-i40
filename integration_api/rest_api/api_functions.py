@@ -47,6 +47,21 @@ def set_table_distance():
     }
     return json.dumps(response), 201
 
+def get_gripper_position():
+
+    coord = request.url.split("/")[-1]
+
+    gripper = Gripper()
+    data = gripper.get_status()
+
+    if coord in ("opening", "rotation"):
+        data = data[coord]
+        
+    response = {
+        "data": data
+    }
+    return json.dumps(response), 200
+
 def get_robot_position_xyz():
 
     coord = request.url.split("/")[-1]
@@ -102,6 +117,22 @@ def move_robot():
         "data": ""
     }
     return json.dumps(response), 202
+
+def move_gripper():
+    coords:dict = request.json["data"]
+
+    opening = coords["opening"].strip()
+    if opening:
+        Gripper().open(int(opening))
+
+    rotation = coords["rotation"].strip()
+    if rotation:
+        Gripper().rotate(int(rotation))
+    
+    response = {
+        "data": ""
+    }
+    return json.dumps(response), 201
 
 def pick_and_place():
 
