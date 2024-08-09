@@ -96,13 +96,19 @@ assetConnections:
         queries:
           result: $.data
 
-      # "[ModelRef](Submodel)FunctionsSubModel, (Operation)pickup":
-      #   format: JSON
-      #   path: /FunctionsSubModel/pickup
-      #   method: POST
-      #   template: '{"x" : ${xValue}, "y" : ${yValue}}'
-      #   queries:
-      #     result: $.data
+      "[ModelRef](Submodel)OperationalData, (Operation)pickAndPlace":
+        format: JSON
+        path: /OperationalData/pickAndPlace
+        method: POST
+        template: |
+          {"data": {
+            "xInitial": ${xInitial}, "yInitial": ${yInitial}, 
+            "xFinal": ${xFinal}, "yFinal": ${yFinal}, 
+            "objectWidth": ${objectWidth}, "objectHeight": ${objectHeight}
+          }}
+        queries:
+          result: $.data
+
       # "[ModelRef](Submodel)FunctionsSubModel, (Operation)rotate":
       #   format: JSON
       #   path: /FunctionsSubModel/rotate

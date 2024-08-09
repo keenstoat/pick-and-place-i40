@@ -16,9 +16,10 @@ api.add_url_rule("/OperationalData/robotPosition/x", view_func=get_robot_positio
 api.add_url_rule("/OperationalData/robotPosition/y", view_func=get_robot_position_xyz, methods=['GET'])
 api.add_url_rule("/OperationalData/robotPosition/z", view_func=get_robot_position_xyz, methods=['GET'])
 
-api.add_url_rule("/OperationalData/initializeModule", view_func=init_module, methods=['POST'])
+api.add_url_rule("/OperationalData/initializeModule", view_func=initialize_module, methods=['POST'])
 api.add_url_rule("/OperationalData/setTableDistance", view_func=set_table_distance, methods=['POST'])
 api.add_url_rule("/OperationalData/moveRobot", view_func=move_robot, methods=['POST'])
+api.add_url_rule("/OperationalData/pickAndPlace", view_func=pick_and_place, methods=['POST'])
 
 if __name__ == '__main__':
     api.run(host="0.0.0.0", port="8080")
