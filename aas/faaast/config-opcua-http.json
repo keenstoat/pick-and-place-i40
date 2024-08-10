@@ -1,4 +1,5 @@
 {
+    "interval": 500,
     "core": {
         "assetConnectionRetryInterval": 1000
     },
@@ -30,6 +31,13 @@
                     "writeMethod": "POST",
                     "query": "$.data"
                 },
+                "[ModelRef](Submodel)OperationalData, (Property)tableDistance": {
+                    "format": "JSON",
+                    "path": "/OperationalData/tableDistance",
+                    "template": "{\"data\": ${value} }",
+                    "writeMethod": "POST",
+                    "query": "$.data"
+                },
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)x": {
                     "format": "JSON",
                     "path": "/OperationalData/robotPosition/x",
@@ -43,6 +51,16 @@
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)z": {
                     "format": "JSON",
                     "path": "/OperationalData/robotPosition/z",
+                    "query": "$.data"
+                },
+                "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)gripperPosition, (Property)opening": {
+                    "format": "JSON",
+                    "path": "/OperationalData/gripperPosition/opening",
+                    "query": "$.data"
+                },
+                "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)gripperPosition, (Property)rotation": {
+                    "format": "JSON",
+                    "path": "/OperationalData/gripperPosition/rotation",
                     "query": "$.data"
                 }
             },
@@ -50,37 +68,49 @@
                 "[ModelRef](Submodel)OperationalData, (Property)isModuleInitialized": {
                     "format": "JSON",
                     "path": "/OperationalData/isModuleInitialized",
-                    "interval": 100,
+                    "interval": 500,
                     "query": "$.data"
                 },
                 "[ModelRef](Submodel)OperationalData, (Property)isModuleBusy": {
                     "format": "JSON",
                     "path": "/OperationalData/isModuleBusy",
-                    "interval": 100,
+                    "interval": 500,
                     "query": "$.data"
                 },
                 "[ModelRef](Submodel)OperationalData, (Property)robotSpeed": {
                     "format": "JSON",
                     "path": "/OperationalData/robotSpeed",
-                    "interval": 100,
+                    "interval": 500,
                     "query": "$.data"
                 },
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)x": {
                     "format": "JSON",
                     "path": "/OperationalData/robotPosition/x",
-                    "interval": 100,
+                    "interval": 500,
                     "query": "$.data"
                 },
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)y": {
                     "format": "JSON",
                     "path": "/OperationalData/robotPosition/y",
-                    "interval": 100,
+                    "interval": 500,
                     "query": "$.data"
                 },
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)z": {
                     "format": "JSON",
                     "path": "/OperationalData/robotPosition/z",
-                    "interval": 100,
+                    "interval": 500,
+                    "query": "$.data"
+                },
+                "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)gripperPosition, (Property)opening": {
+                    "format": "JSON",
+                    "path": "/OperationalData/gripperPosition/opening",
+                    "interval": 500,
+                    "query": "$.data"
+                },
+                "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)gripperPosition, (Property)rotation": {
+                    "format": "JSON",
+                    "path": "/OperationalData/gripperPosition/rotation",
+                    "interval": 500,
                     "query": "$.data"
                 }
             },
@@ -94,20 +124,29 @@
                         "result": "$.data"
                     }
                 },
-                "[ModelRef](Submodel)OperationalData, (Operation)setTableDistance": {
-                    "format": "JSON",
-                    "path": "/OperationalData/setTableDistance",
-                    "method": "POST",
-                    "template": "{\"data\": ${tableDistanceFromRobotBase}}",
-                    "queries": {
-                        "result": "$.data"
-                    }
-                },
                 "[ModelRef](Submodel)OperationalData, (Operation)moveRobot": {
                     "format": "JSON",
                     "path": "/OperationalData/moveRobot",
                     "method": "POST",
                     "template": "{\"data\": {\"x\": ${x}, \"y\": ${y}, \"z\": ${z}, \"speed\": ${speed} }}",
+                    "queries": {
+                        "result": "$.data"
+                    }
+                },
+                "[ModelRef](Submodel)OperationalData, (Operation)moveGripper": {
+                    "format": "JSON",
+                    "path": "/OperationalData/moveGripper",
+                    "method": "POST",
+                    "template": "{\"data\": {\"opening\": ${opening}, \"rotation\": ${rotation} }}",
+                    "queries": {
+                        "result": "$.data"
+                    }
+                },
+                "[ModelRef](Submodel)OperationalData, (Operation)pickAndPlace": {
+                    "format": "JSON",
+                    "path": "/OperationalData/pickAndPlace",
+                    "method": "POST",
+                    "template": "{\"data\": {\n  \"xInitial\": ${xInitial}, \"yInitial\": ${yInitial}, \n  \"xFinal\": ${xFinal}, \"yFinal\": ${yFinal}, \n  \"objectWidth\": ${objectWidth}, \"objectHeight\": ${objectHeight}\n}}\n",
                     "queries": {
                         "result": "$.data"
                     }

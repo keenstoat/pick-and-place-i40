@@ -80,17 +80,19 @@ def initialize_module():
         }
         return json.dumps(response), 202
 
-def set_table_distance():
+def get_set_table_distance():
 
     global _table_distance_from_robot_base
 
-    data = request.json["data"]
-    _table_distance_from_robot_base = float(data)
+    if request.method == "GET":
+        response = {
+            "data": _table_distance_from_robot_base or -1
+        }
+        return json.dumps(response), 200
 
-    response = {
-         "data": ""
-    }
-    return json.dumps(response), 201
+    distance = request.json["data"]
+    _table_distance_from_robot_base = int(distance)
+    return '', 201
 
 def get_gripper_position():
 
