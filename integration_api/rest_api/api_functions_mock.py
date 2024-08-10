@@ -1,17 +1,62 @@
 from flask import json, request
-from gripper.gripper import Gripper
-from delta_robot.delta_robot import DeltaRobot
 import threading
 from os import environ
+from time import sleep
 
 ROBOT_BASE_TO_END_EFFECTOR_BASE_INITIAL_DISTANCE = 290 # mm
 ROBOT_Z_RANGE = 300 # mm
 GRIPPER_HEIGHT = 140 # mm
 
-_ROBOT_IP_ADDRESS = "192.168.3.11"
-_ROBOT_PORT = 502
-
 _table_distance_from_robot_base = None
+
+_opening = 0
+_rotation = 0
+class Gripper:
+    
+    def get_status(self):
+        return {"opening": _opening, "rotation": _rotation}
+    def open(self, val):
+        global _opening
+        _opening = val
+    def rotate(self, val):
+        global _rotation
+        _rotation = val
+
+class DeltaRobot:
+
+    _is_enabled = False
+    _is_referenced = False
+    x,y,z = 0,0,0
+    speed = 100
+    _is_moving = False
+    def is_enabled(self):
+        return self._is_enabled
+    def is_referenced(self):
+        return self._is_referenced
+    def get_target_position_cart(self):
+        return self.x, self.y, self.z
+    def get_speed(self):
+        return self.speed
+    def set_speed(self, speed):
+        self.speed = speed
+    def is_moving(self):
+        return self._is_moving
+    def move_cartesian(self, x=None, y=None, z=None, speed=None):
+        
+        dx = (x-self.x)/10 if x is not None else 0
+        dy = (y-self.y)/10 if y is not None else 0
+        dz = (z-self.z)/10 if z is not None else 0
+
+        if speed:
+            self.speed = speed
+        self._is_moving = True
+        for _ in range(10):
+            self.x+=dx
+            self.y+=dy
+            self.z+=dz
+            print(f"{self.x}, {self.y}, {self.z}")
+            sleep(0.3)
+        self._is_moving = False
 
 def status():
     response = {
@@ -151,35 +196,35 @@ def pick_and_place():
         z_ini = robot_lowest_position + object_height + 10 # mm
 
         # Pick Object =======================================================
-        # step("position above object")
+        print("position above object")
         robot.move_cartesian(x=x_ini, y=y_ini, z=z_ini)
         
-        # step("open gripper...")
+        print("open gripper...")
         gripper.open(object_width + 10)
 
-        # step("position to grab object")
+        print("position to grab object")
         robot.move_cartesian(z=robot_lowest_position)
         
-        # step("close gripper...")
+        print("close gripper...")
         gripper.open(object_width-5)
 
-        # step("pick up object")
+        print("pick up object")
         robot.move_cartesian(x=0, y=0, z=ROBOT_Z_RANGE)
 
         # Place Object =======================================================
-        # step("position to place object")
+        print("position to place object")
         robot.move_cartesian(x=x_end, y=y_end, z=robot_lowest_position)
         
-        # step("open gripper...")
+        print("open gripper...")
         gripper.open(object_width + 10)
 
-        # step("position above object")
+        print("position above object")
         robot.move_cartesian(z=z_ini)
 
-        # step("return to base position")
+        print("return to base position")
         robot.move_cartesian(x=0, y=0, z=ROBOT_Z_RANGE)
         
-        # step("close gripper...")
+        print("close gripper...")
         gripper.open(0)
 
     threading.Thread(target=do, args=[]).start()
@@ -190,48 +235,25 @@ def pick_and_place():
 
 # aux functions ========================================================================================================
 def init_module():
-    gripper = Gripper()
+    global _rotation, _opening
     robot = get_robot()
     
-    print("Has General Error       : ", robot.has_module_error())
-    print("Has Kinemat Error       : ", robot.has_kinematics_error())
-    print()
-    print("Module Error List   : ", robot.get_module_error_list())
-    print("Kino Error List     : ", robot.get_kinematics_error_list())
-    print("Kino error single   : ", robot.get_kinematics_error())
-    print("Info or error short : ", robot.get_info_or_message())
-    print()
-
-    if not robot.is_referenced():
-        print("Robot NOT referenced. Resetting now.")
-        robot.reset()
-        print("Enabling motors now..")
-        robot.enable()
-        print("Referencing now..")
-        if not robot.reference():
-            print("Coult NOT reference robot. Try again")
-            return
-    print("Robot is referenced!")
-
-    robot.enable()
-    robot.set_override_velocity(100)
-    robot.set_speed(200)
-    robot.move_cartesian(x=0, y=0, z=ROBOT_Z_RANGE)
-    robot.set_speed(100)
-
-    gripper.open(0)
-    gripper.rotate(90)
+    robot._is_enabled = True
+    robot._is_referenced = True
+    _opening = 0
+    _rotation = 0
 
 def get_robot_lowest_position():
     z = ROBOT_Z_RANGE - (_table_distance_from_robot_base - ROBOT_BASE_TO_END_EFFECTOR_BASE_INITIAL_DISTANCE) + GRIPPER_HEIGHT
     return z
 
-def get_robot():
-    
-    robot_ip_address = environ.get("ROBOT_IP_ADDRESS", _ROBOT_IP_ADDRESS)
-    robot_port = int(environ.get("ROBOT_PORT", _ROBOT_PORT))
 
-    robot = DeltaRobot(robot_ip_address, port=robot_port)
-    assert robot.is_connected, f"DeltaRobot could not connect to {robot_ip_address} on port {robot_port}"
-    return robot
+_robot = None
+def get_robot():
+    global _robot
+
+    if not _robot:
+        _robot = DeltaRobot()
+    
+    return _robot
     
