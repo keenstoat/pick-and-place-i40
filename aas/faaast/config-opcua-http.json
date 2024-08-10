@@ -83,6 +83,12 @@
                     "interval": 500,
                     "query": "$.data"
                 },
+                "[ModelRef](Submodel)OperationalData, (Property)tableDistance": {
+                    "format": "JSON",
+                    "path": "/OperationalData/tableDistance",
+                    "interval": 500,
+                    "query": "$.data"
+                },
                 "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)x": {
                     "format": "JSON",
                     "path": "/OperationalData/robotPosition/x",
