@@ -45,3 +45,9 @@ sync:
 	cp /mnt/c/Users/charles/Desktop/pick-and-place.aasx aas/faaast/.
 	rsync -a --delete ${PROJECT_ROOT}/ pi:${PROJECT_ROOT}/
 
+up:
+	cd ${AAS_DIR} && make config
+	docker compose up -d
+
+down:
+	docker compose down

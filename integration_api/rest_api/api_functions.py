@@ -13,6 +13,8 @@ _ROBOT_PORT = 502
 
 _table_distance_from_robot_base = None
 
+_pick_and_place_active = False
+
 # memoized gripper object
 _gripper = None
 
@@ -102,7 +104,7 @@ def is_module_busy():
 
     robot = get_robot()
     response = {
-        "data": robot.is_moving()
+        "data": robot.is_moving() or _pick_and_place_active
     }
     return json.dumps(response), 200
 
@@ -150,6 +152,8 @@ def pick_and_place():
     object_height = data["objectHeight"]
 
     def do():
+        global _pick_and_place_active
+        _pick_and_place_active = True
         robot = get_robot()
         gripper = get_gripper()
         robot_lowest_position = get_robot_lowest_position()
@@ -186,6 +190,7 @@ def pick_and_place():
         
         # step("close gripper...")
         gripper.open(0)
+        _pick_and_place_active = False
 
     threading.Thread(target=do, args=[]).start()
     response = {

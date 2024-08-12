@@ -11,6 +11,8 @@ build:
 copy:
 	cp /mnt/c/Users/charles/Desktop/pick-and-place.aasx faaast/.
 	
-up:
+config:
 	./yaml2json.py config-opcua-http.yaml faaast/config-opcua-http.json
+	
+up: config
 	docker compose up
