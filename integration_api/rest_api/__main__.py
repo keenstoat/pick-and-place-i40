@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 from flask import Flask
-from api_functions_mock import * # TODO change back to real functions
+from api_functions import * # TODO change back to real functions
 
 api = Flask(__name__)
 

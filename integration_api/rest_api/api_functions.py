@@ -13,6 +13,9 @@ _ROBOT_PORT = 502
 
 _table_distance_from_robot_base = None
 
+# memoized gripper object
+_gripper = None
+
 def status():
     response = {
          "data": "status ok!"
@@ -53,7 +56,7 @@ def get_gripper_position():
 
     coord = request.url.split("/")[-1]
 
-    gripper = Gripper()
+    gripper = get_gripper()
     data = gripper.get_status()
 
     if coord in ("opening", "rotation"):
@@ -125,11 +128,11 @@ def move_gripper():
 
     opening = coords["opening"].strip()
     if opening:
-        Gripper().open(int(opening))
+        get_gripper().open(int(opening))
 
     rotation = coords["rotation"].strip()
     if rotation:
-        Gripper().rotate(int(rotation))
+        get_gripper().rotate(int(rotation))
     
     response = {
         "data": ""
@@ -148,7 +151,7 @@ def pick_and_place():
 
     def do():
         robot = get_robot()
-        gripper = Gripper()
+        gripper = get_gripper()
         robot_lowest_position = get_robot_lowest_position()
         z_ini = robot_lowest_position + object_height + 10 # mm
 
@@ -192,7 +195,7 @@ def pick_and_place():
 
 # aux functions ========================================================================================================
 def init_module():
-    gripper = Gripper()
+    gripper = get_gripper()
     robot = get_robot()
     
     print("Has General Error       : ", robot.has_module_error())
@@ -237,3 +240,10 @@ def get_robot():
     assert robot.is_connected, f"DeltaRobot could not connect to {robot_ip_address} on port {robot_port}"
     return robot
     
+def get_gripper():
+    global _gripper
+
+    if not _gripper:
+        _gripper = Gripper()
+    
+    return _gripper

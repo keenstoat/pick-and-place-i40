@@ -1,7 +1,7 @@
 services:
-  aas-opcua-http: #TODO change this
-    image: fraunhoferiosb/faaast-service:1.1 
-    # image: faaast-server-arm:1.1.0
+  aas:
+    # image: fraunhoferiosb/faaast-service:1.1 
+    image: faaast-server-arm:1.1.0
     ports:
       - 4840:4840
     extra_hosts:
@@ -20,8 +20,8 @@ services:
     image: integration-api:1.0
     ports:
       - 8080:8080
-    # devices: # TODO this is required on deployment
-    #   - /dev/ttyUSB0:/dev/ttyUSB0
+    devices:
+      - /dev/ttyUSB0:/dev/ttyUSB0
     environment:
       ROBOT_IP_ADDRESS: "192.168.3.11"
       ROBOT_PORT: 502

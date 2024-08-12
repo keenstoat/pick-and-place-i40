@@ -25,8 +25,7 @@ int currentRotation = 0;
 
 JsonDocument jsonDoc;
 
-void setup()
-{
+void setup() {
     Serial.begin(115200);
     servoOpen.attach(OPEN_SERVO_PIN);
     servoRotate.attach(ROTATE_SERVO_PIN);

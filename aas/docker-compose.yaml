@@ -1,7 +1,7 @@
 services:
-  aas-opcua-http: #TODO change this
-    image: fraunhoferiosb/faaast-service:1.1 
-    # image: faaast-server-arm:1.1.0
+  aas:
+    # image: fraunhoferiosb/faaast-service:1.1 
+    image: faaast-server-arm:1.1.0
     ports:
       - 4840:4840
     extra_hosts:
@@ -12,5 +12,4 @@ services:
       faaast_model: /faaast/pick-and-place.aasx
       faaast_config: /faaast/config-opcua-http.json
       faaast_loglevel_faaast: DEBUG
-
       faaast_config_extension_assetConnections[0]_baseUrl: http://host.docker.internal:8080
