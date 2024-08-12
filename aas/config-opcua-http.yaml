@@ -1,5 +1,5 @@
 ---
-interval: &interval 500
+interval: &interval 300
 core:
   assetConnectionRetryInterval: 1000
 
@@ -54,11 +54,11 @@ assetConnections:
         query: $.data
     
     subscriptionProviders:
-      "[ModelRef](Submodel)OperationalData, (Property)isModuleInitialized": 
-        format: JSON
-        path: /OperationalData/isModuleInitialized
-        interval: *interval
-        query: $.data
+      # "[ModelRef](Submodel)OperationalData, (Property)isModuleInitialized": 
+      #   format: JSON
+      #   path: /OperationalData/isModuleInitialized
+      #   interval: *interval
+      #   query: $.data
       "[ModelRef](Submodel)OperationalData, (Property)isModuleBusy":
         format: JSON
         path: /OperationalData/isModuleBusy
@@ -69,11 +69,11 @@ assetConnections:
         path: /OperationalData/robotSpeed
         interval: *interval
         query: $.data
-      "[ModelRef](Submodel)OperationalData, (Property)tableDistance": 
-        format: JSON
-        path: /OperationalData/tableDistance
-        interval: *interval
-        query: $.data
+      # "[ModelRef](Submodel)OperationalData, (Property)tableDistance": 
+      #   format: JSON
+      #   path: /OperationalData/tableDistance
+      #   interval: *interval
+      #   query: $.data
       "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)robotPosition, (Property)x":
         format: JSON
         path: /OperationalData/robotPosition/x
@@ -89,16 +89,16 @@ assetConnections:
         path: /OperationalData/robotPosition/z
         interval: *interval
         query: $.data
-      "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)gripperPosition, (Property)opening": 
-        format: JSON
-        path: /OperationalData/gripperPosition/opening
-        interval: *interval
-        query: $.data
-      "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)gripperPosition, (Property)rotation": 
-        format: JSON
-        path: /OperationalData/gripperPosition/rotation
-        interval: *interval
-        query: $.data
+      # "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)gripperPosition, (Property)opening": 
+      #   format: JSON
+      #   path: /OperationalData/gripperPosition/opening
+      #   interval: *interval
+      #   query: $.data
+      # "[ModelRef](Submodel)OperationalData, (SubmodelElementCollection)gripperPosition, (Property)rotation": 
+      #   format: JSON
+      #   path: /OperationalData/gripperPosition/rotation
+      #   interval: *interval
+      #   query: $.data
     
     operationProviders:
 
