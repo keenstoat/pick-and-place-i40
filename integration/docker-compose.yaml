@@ -1,6 +1,6 @@
 services:
   integration-api:
-    image: integration-api:1.0
+    image: integration-app:1.0
     ports:
       - 8080:8080
     devices:

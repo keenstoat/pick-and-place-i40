@@ -18,15 +18,19 @@ _pick_and_place_active = False
 # memoized gripper object
 _gripper = None
 
-def status():
+def info():
     response = {
-         "data": "status ok!"
+        "data": {
+            "author": "carlos.josue.rene.avila.carrillo@stud.hs-emden-leer.de",
+            "date": "september 2024",
+            "description": "Integration application to monitor and control a few aspects of the Delta Robot and the Gripper of the pick and place module in the Technikum's Digital Factory."
+        }
     }
     return json.dumps(response), 200
 
 def is_module_initialized():
 
-    robot = get_robot()
+    robot = _get_robot()
     response = {
         "data": robot.is_enabled() and robot.is_referenced()
     }
@@ -34,7 +38,7 @@ def is_module_initialized():
 
 def initialize_module():
         
-        threading.Thread(target=init_module, args=[]).start()
+        threading.Thread(target=_init_module, args=[]).start()
         response = {
             "data": ""
         }
@@ -58,7 +62,7 @@ def get_gripper_position():
 
     coord = request.url.split("/")[-1]
 
-    gripper = get_gripper()
+    gripper = _get_gripper()
     data = gripper.get_status()
 
     if coord in ("opening", "rotation"):
@@ -73,7 +77,7 @@ def get_robot_position_xyz():
 
     coord = request.url.split("/")[-1]
 
-    robot = get_robot()
+    robot = _get_robot()
     x, y, z = robot.get_target_position_cart()
 
     data = {"x": x, "y": y, "z": z}
@@ -88,7 +92,7 @@ def get_robot_position_xyz():
 
 def get_set_robot_speed():
 
-    robot = get_robot()
+    robot = _get_robot()
 
     if request.method == "GET":
         response = {
@@ -102,7 +106,7 @@ def get_set_robot_speed():
     
 def is_module_busy():
 
-    robot = get_robot()
+    robot = _get_robot()
     response = {
         "data": robot.is_moving() or _pick_and_place_active
     }
@@ -118,7 +122,7 @@ def move_robot():
     if xyzs["speed"]:
         xyzs["speed"] = int(xyzs["speed"])
 
-    robot = get_robot()
+    robot = _get_robot()
     threading.Thread(target=robot.move_cartesian, args=[xyzs["x"], xyzs["y"], xyzs["z"], xyzs["speed"]]).start()
     response = {
         "data": ""
@@ -130,11 +134,11 @@ def move_gripper():
 
     opening = coords["opening"].strip()
     if opening:
-        get_gripper().open(int(opening))
+        _get_gripper().open(int(opening))
 
     rotation = coords["rotation"].strip()
     if rotation:
-        get_gripper().rotate(int(rotation))
+        _get_gripper().rotate(int(rotation))
     
     response = {
         "data": ""
@@ -154,9 +158,9 @@ def pick_and_place():
     def do():
         global _pick_and_place_active
         _pick_and_place_active = True
-        robot = get_robot()
-        gripper = get_gripper()
-        robot_lowest_position = get_robot_lowest_position()
+        robot = _get_robot()
+        gripper = _get_gripper()
+        robot_lowest_position = _get_robot_lowest_position()
         z_ini = robot_lowest_position + object_height + 10 # mm
 
         # Pick Object =======================================================
@@ -199,17 +203,16 @@ def pick_and_place():
     return json.dumps(response), 202
 
 # aux functions ========================================================================================================
-def init_module():
-    gripper = get_gripper()
-    robot = get_robot()
+
+def _init_module():
+    gripper = _get_gripper()
+    robot = _get_robot()
     
     print("Has General Error       : ", robot.has_module_error())
     print("Has Kinemat Error       : ", robot.has_kinematics_error())
     print()
     print("Module Error List   : ", robot.get_module_error_list())
     print("Kino Error List     : ", robot.get_kinematics_error_list())
-    print("Kino error single   : ", robot.get_kinematics_error())
-    print("Info or error short : ", robot.get_info_or_message())
     print()
 
     if not robot.is_referenced():
@@ -232,11 +235,11 @@ def init_module():
     gripper.open(0)
     gripper.rotate(90)
 
-def get_robot_lowest_position():
+def _get_robot_lowest_position():
     z = ROBOT_Z_RANGE - (_table_distance_from_robot_base - ROBOT_BASE_TO_END_EFFECTOR_BASE_INITIAL_DISTANCE) + GRIPPER_HEIGHT
     return z
 
-def get_robot():
+def _get_robot():
     
     robot_ip_address = environ.get("ROBOT_IP_ADDRESS", _ROBOT_IP_ADDRESS)
     robot_port = int(environ.get("ROBOT_PORT", _ROBOT_PORT))
@@ -245,7 +248,8 @@ def get_robot():
     assert robot.is_connected, f"DeltaRobot could not connect to {robot_ip_address} on port {robot_port}"
     return robot
     
-def get_gripper():
+def _get_gripper():
+    
     global _gripper
 
     if not _gripper:

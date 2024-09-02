@@ -5,7 +5,7 @@ from api_functions import * # TODO change back to real functions
 
 api = Flask(__name__)
 
-api.add_url_rule("/status", view_func=status, methods=['GET'])
+api.add_url_rule("/info", view_func=info, methods=['GET'])
 
 api.add_url_rule("/OperationalData/isModuleInitialized", view_func=is_module_initialized, methods=['GET'])
 api.add_url_rule("/OperationalData/isModuleBusy", view_func=is_module_busy, methods=['GET'])

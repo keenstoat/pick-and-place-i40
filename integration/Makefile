@@ -1,5 +1,5 @@
 SHELL=bash
-DOCKER_IMAGE_NAME=integration-api
+DOCKER_IMAGE_NAME=integration-app
 DOCKER_IMAGE_TAG=1.0
 
 clean:
@@ -7,9 +7,6 @@ clean:
 
 build:
 	docker build --platform linux/arm/v8 -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} .
-
-up:
-	docker compose up
 
 save:
 	rm -rf /tmp/${DOCKER_IMAGE_NAME}-file || true
@@ -20,3 +17,6 @@ send:
 
 load:
 	docker load -i /tmp/${DOCKER_IMAGE_NAME}-file
+
+up:
+	docker compose up

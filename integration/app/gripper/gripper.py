@@ -82,27 +82,3 @@ class Gripper:
             payload["openMaxDelayMs"] = openMaxDelayMs
 
         return self.send_command(payload)
-
-if __name__ == "__main__":
-
-    argv.pop(0)
-    if not argv:
-        exit(1)
-
-    action = argv.pop(0)
-    if argv:
-        value = int(argv.pop(0))
-        
-    rel = True if argv and argv.pop(0)=="true" else False
-    g = Gripper()
-
-    if action == "open": print(g.open_percent(value, rel))
-    if action == "mm": print(g.open(value, rel))
-    if action == "rotate": print(g.rotate(value, rel))
-    if action == "status": print(g.get_status())
-    if action == "opening": print(g.get_openning())
-    if action == "rotation": print(g.get_rotation())
-
-    if action == "rotateMaxDelayMs": print(g.config(rotateMaxDelayMs=value))
-    if action == "openMaxDelayMs": print(g.config(openMaxDelayMs=value))
-    

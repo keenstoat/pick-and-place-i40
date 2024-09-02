@@ -1,0 +1,45 @@
+---
+title: Pick and Place Module
+subtitle: RAMI4.0 architecture layer vertical integration
+date: 09/01/2024 # today se puede tambien
+date-format: "MMMM DD, YYYY"
+author: Carlos Josue Rene Avila Carrillo
+
+lang: en # default es en - auto captions quedan en este lenguaje
+
+format:
+  pdf:
+    documentclass: scrartcl #scrreprt
+    papersize: letter
+    fig-pos: H
+
+geometry: [left=3cm,right=3cm,top=3cm,bottom=3cm]
+fontsize: 12pt
+# mainfont: Bitter
+# monofont: Monaco
+linestretch: 1.5
+
+toc: true
+toc-title: Table of Contents
+number-sections: true
+
+---
+
+\newpage
+
+# Abstract
+asdfasdf
+
+# Introduction
+
+asdfasf
+asdfaf
+
+
+# RAMI 4.0
+
+asdfasfdadsfadsf
+
+# Digital Factory
+asdfasdfasdf
+

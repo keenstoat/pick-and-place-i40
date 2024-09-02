@@ -62,7 +62,8 @@ class Coils(IntEnum):
     # 134 # (rising edge) Go to the base directory (.../Data/Programs)
     # 135 # (rising edge) Unload robot program
     # 136 # (rising edge) Unload logic program
-    # 200-299 # (boolean) Global signals
+    GLOBAL_SIGNALS_START = 200 # 200-299 # (boolean) Global signals
+    GLOBAL_SIGNALS_END = 299 # 200-299 # (boolean) Global signals
     # 300-363 # (boolean) Digital outputs
     # 364-427 # (info) Digital inputs
 
