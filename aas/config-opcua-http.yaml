@@ -9,7 +9,7 @@ endpoints:
 
 assetConnections:
   - "@class": de.fraunhofer.iosb.ilt.faaast.service.assetconnection.http.HttpAssetConnection
-    baseUrl: http://localhost:8080
+    baseUrl: http://localhost:8080 # this should ONLY be modified by setting the 'faaast_config_extension_assetConnections[0]_baseUrl' env variable
     
     valueProviders:
       "[ModelRef](Submodel)OperationalData, (Property)isModuleInitialized": 
@@ -135,10 +135,3 @@ assetConnections:
           }}
         queries:
           result: $.data
-      
-      # "[ModelRef](Submodel)FunctionsSubModel, (Operation)status":
-      #   format: JSON
-      #   path: /status
-      #   method: GET
-      #   queries:
-      #     result: $.data

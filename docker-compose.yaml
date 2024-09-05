@@ -1,6 +1,6 @@
 services:
   aas:
-    # image: fraunhoferiosb/faaast-service:1.1 
+    restart: unless-stopped
     image: faaast-server-arm:1.1.0
     ports:
       - 4840:4840
@@ -12,12 +12,13 @@ services:
       faaast_model: /faaast/pick-and-place.aasx
       faaast_config: /faaast/config-opcua-http.json
       faaast_loglevel_faaast: DEBUG
-      faaast_config_extension_assetConnections[0]_baseUrl: http://integration-api:8080
+      faaast_config_extension_assetConnections[0]_baseUrl: http://integration-app:8080
     depends_on:
-      - integration-api
+      - integration-app
 
-  integration-api:
-    image: integration-api:1.0
+  integration-app:
+    restart: unless-stopped
+    image: integration-app:1.0
     ports:
       - 8080:8080
     devices:

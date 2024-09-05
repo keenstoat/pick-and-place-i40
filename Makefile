@@ -2,38 +2,33 @@ SHELL=bash
 
 PROJECT_ROOT=/home/charles/repos/project-ss
 AAS_DIR=aas
-INTEGRATION_API_DIR=integration_api
+INTEGRATION_DIR=integration
 
-cleanaas:
-	cd ${AAS_DIR} && make clean
+SYSTEMD_SERVICE_FILENAME=pick-and-place.service
+SYSTEMD_SERVICES_PATH=/etc/systemd/system
 
-buildaas:
-	cd ${AAS_DIR} && make build
 
-upaas:
-	cd ${AAS_DIR} && make up
+
+install:
+	cp ${SYSTEMD_SERVICE_FILENAME} ${SYSTEMD_SERVICES_PATH}/${SYSTEMD_SERVICE_FILENAME}
+	sudo systemctl daemon-reload
+	sudo systemctl enable ${SYSTEMD_SERVICE_FILENAME}
 
 #=======================================================================================================================
 
-cleanapi:
-	cd ${INTEGRATION_API_DIR} && make clean
+clean-aas:
+	cd ${AAS_DIR} && make clean
 
-buildapi:
-	cd ${INTEGRATION_API_DIR} && make build
+build-aas:
+	cd ${AAS_DIR} && make build
 
-upapi: loadapi
-	cd ${INTEGRATION_API_DIR} && make up
+#=======================================================================================================================
 
-saveapi:
-	cd ${INTEGRATION_API_DIR} && make save
+clean-app:
+	cd ${INTEGRATION_DIR} && make clean
 
-sendapi:
-	cd ${INTEGRATION_API_DIR} && make send
-
-loadapi:
-	cd ${INTEGRATION_API_DIR} && make load
-
-api: cleanapi buildapi saveapi sendapi
+build-app:
+	cd ${INTEGRATION_DIR} && make build
 
 
 #=======================================================================================================================
@@ -44,10 +39,3 @@ cleanall:
 sync:
 	cp /mnt/c/Users/charles/Desktop/pick-and-place.aasx aas/faaast/.
 	rsync -a --delete ${PROJECT_ROOT}/ pi:${PROJECT_ROOT}/
-
-up:
-	cd ${AAS_DIR} && make config
-	docker compose up -d
-
-down:
-	docker compose down

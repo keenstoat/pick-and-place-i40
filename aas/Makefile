@@ -8,11 +8,7 @@ clean:
 build:
 	docker build --platform linux/arm/v8 -t ${DOCKER_IMAGE_NAME}:${DOCKER_IMAGE_TAG} .
 
-copy:
-	cp /mnt/c/Users/charles/Desktop/pick-and-place.aasx faaast/.
-	
 config:
+	cp /mnt/c/Users/charles/Desktop/pick-and-place.aasx faaast/. # TODO: remove
 	./yaml2json.py config-opcua-http.yaml faaast/config-opcua-http.json
 	
-up: config
-	docker compose up
