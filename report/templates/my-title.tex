@@ -1,0 +1,48 @@
+\begin{titlepage}
+
+$if(logo)$
+  \begin{center}
+    \includegraphics[width=0.4\textwidth]{$logo$}
+  \end{center}
+$endif$
+
+
+\vfill
+\begin{center}
+  \huge{$title$}
+  $if(subtitle)$
+    \\
+    \LARGE{$subtitle$}
+  $endif$
+\end{center}
+\vfill
+
+$if(author)$
+  \begin{center}
+    \begin{tabular}{c}
+        \large\textbf{{Author:}} \\[0.5cm]
+        \large{$author$} \\
+    \end{tabular}\\[1cm]
+  \end{center}
+$endif$
+
+$if(examiners)$
+  \begin{center}
+    \begin{tabular}{c}
+        \large\textbf{{Examiners:}} \\[0.5cm]
+        $for(examiners)$
+            \large{$examiners$} \\
+        $endfor$
+    \end{tabular}\\[2cm]
+  \end{center}
+$endif$
+
+\begin{center}
+  \large{$course$}\\
+  \vspace{0.5cm}
+  \large{$date$}\\
+  \vspace{0.5cm}
+  \textit{\footnotesize{Hochschule Emden/Leer · Constantiaplatz 4 · 26723 Emden · http://www.hs-emden-leer.de}}
+\end{center}
+
+\end{titlepage}
