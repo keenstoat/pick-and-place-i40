@@ -6,8 +6,8 @@ date: today
 date-format: "MMMM DD, YYYY"
 author: Carlos Josue Rene Avila Carrillo (7025691)
 examiners:
-    - Prof. Dr. Armando Walter Colombo
-    - M.Eng. Jeffrey Werman
+  - Prof. Dr. Armando Walter Colombo
+  - M.Eng. Jeffrey Werman
 course: M.Eng. Industrial Informatics - Semester Project - SS 2024
 
 lang: en # default es en - auto captions quedan en este lenguaje
@@ -18,16 +18,16 @@ format:
     template-partials:
         - templates/my-title.tex
     documentclass: scrartcl #scrreprt
-    classoption: a4paper
-    papersize: A4
+    papersize: a4
     fig-pos: H
     toc: true
     toc-title: Contents
     number-sections: true
     lof: true
     lot: true
+    cite-method: biblatex
 
-geometry: [left=3cm,right=3cm,top=2cm,bottom=2cm]
+geometry: [left=3cm,right=3cm,top=2cm,bottom=3cm]
 fontsize: 12pt
 mainfont: Times New Roman
 sansfont: Times New Roman
@@ -36,7 +36,6 @@ linestretch: 1.25
 
 bibliography: references.bib
 csl: https://raw.githubusercontent.com/citation-style-language/styles/master/engineering-technology-and-applied-science-research.csl
-
 
 ---
 
@@ -47,49 +46,112 @@ asdfasdf
 
 # Introduction
 
+The [Plattform Industrie 4.0](https://www.plattform-i40.de/IP/Navigation/DE/Home/home.html) is a German government initiative aimed at advancing the digital transformation of manufacturing and production industries. In a general sense this concept is known by other names such as: the fourth industrial revolution, smart manufacturing, industrial internet of things (IIoT), to name a few. The Plattform Industrie 4.0 name for this concept is **Industrie 4.0**.
+
+## Industrie 4.0
+Industrie 4.0 refers to the intelligent networking of machines and processes for Industrie with the help of information and communication technology. Its fundamental purpose is to facilitate cooperation and collaboration between technical objects (assets), which means they have to be virtually represented and connected [@DIN_SPEC_91345].
+
+### RAMI4.0
+The Plattform Industrie 4.0, in partnership with many other stakeholders, has created the **DIN SPEC 91345**. This DIN SPEC describes the RAMI4.0 which is a reference architecture model in the form of a cubic layer model, which provides an architecture for technical objects (assets) in the form of layers, and allows them to be described, tracked over their entire lifetime and assigned to technical and/or organizational hierarchies. It also describes the structure and function of Industrie 4.0 components as essential parts of the virtual representation of assets. [@DIN_SPEC_91345].
+
+## Digital Factory
+
+asfa
+
+### Pick and place module
+
+Worked previously under the name of Delta robot
+
+
+## FAAAST Service ?
 asdfasf
-asdfaf
+
+
+
+
+
+
+The goal of this project is to present a functional implementation of the pick and place module as an Industry 4.0 component by exposing its operational data as a digital twin using an AAS served through an OPC UA server.
+
+
+This document is not only a report on the semester project but also aims to be a manual or guide into how to use the RAMI4.0 as a conceptual tool to digitalize an asset.
 
 # Methodology
 
-This project aims to show how to digitize and digitalize the pick and place module as an asset in the context of Industry 4.0.
-
-The fundamental purpose of Industry 4.0 is to facilitate cooperation and collaboration between technical objects, which means they have to be virtually represented and connected. In this context, a technical object is an object that is of value to an organization [@DIN_SPEC_91345].
-
-The reference architecture model Industrie 4.0 (RAMI4.0) is a tool that allows the representation of an asset as a technical object in an organization's functional hierarchy and through its entire lifetime [@DIN_SPEC_91345]. It is a reference for creating Industry 4.0-compliant digital twins.
-
-![Imagen de stoat](img/pick-and-place-module.svg)
+The RAMI4.0 is used to create a model of an asset as an Industrie 4.0 component. The first step is to locate the asset in the RAMI4.0, this means that the dimensions of the RAMI4.0 are nav?????????????????
 
 ## Asset position in the RAMI 4.0
 
-The RAMI4.0 describes three dimensions orthogonal to each other. Navigating the RAMI4.0 allows US to determine the relevant data and information to digitalize. >> in a few words describe here how the RAMI is navigated <<
+The RAMI4.0 is a three-dimensional layered reference model. @fig-rami-full shows a visual representation of the RAMI4.0. Being a reference model simply means it is a model that is used as a reference or basis to create other models. In this case a model of the pick and place module as an Industrie 4.0 component.
+
+Each dimension of the RAMI4.0 provides a context in which an asset is represented. In a broad sense navigating the RAMI4.0 involves three steps: 
+
+1. Determine the position of the asset in the Hierarchy Levels axis. 
+2. Determine the position of the asset in the Life cycle & Value stream axis. 
+3. Determine the contents of the architecture layers axis.
+
+Steps 1 and 2 provide a notion of **what** data and information is relevant to digitalize given a context. Step 3 provides a notion of **how** to digitalize the relevant data, this is, how the data and information is going to be made available to the business.
+
+![RAMI4.0](img/rami-full.svg){#fig-rami-full}
+
+The following three sections explain these steps in more detail using the pick and place module as the asset to digitalize.
 
 ### Position in the Hierarchy Levels Axis
-The "Hierarchy levels" axis is used to describe an asset at a particular level in a functional hierarchy based on the activities it performs in an organization. This functional hierarchy includes business planning and logistics, manufacturing operations management, and batch, continuous or discrete control. The levels provide different functions and work in different timeframes.[@IEC62264_1]
 
-The pick and place module is a **station**.
+The Hierarchy levels axis of the RAMI4.0 is based on the role-based hierarchy model of the IEC62264 [@IEC62264_1]. This axis describes the assets of an enterprise that are involved in manufacturing. 
+
+The RAMI4.0 adds the "Connected World", "Field Device", and "Product" levels to reflect the needs of Industrie 4.0. @fig-hierarchy-levels shows an example of the levels in this axis referencing real components to give the reader a broader picture of where the pick and place module is located in this hierarchy and how it relates to other components in the enterprise.
+
+![Role-based Hierarchy Levels](img/hierarchy-levels.svg){#fig-hierarchy-levels}
+
+The role-based hierarchy defined in IEC62264 and the levels in the hierarchy axis of the RAMI4.0 do have a one-to-one mapping. This might lead to confusions when classifying assets in the hierarchy. This is for the modeler to determine so as long as it makes sense to the organization. For example, an enterprise, a site and an area may be all classified in the enterprise level.
+
+In this case the pick and place module is classified as a **Station** 
+
+:::{.callout-note}
+A common definition of a Station is an asset that is composed of sensors and actuators. This is incomplete.
+
+A better definition of a Station is an asset that has the equipment to manipulate a product (has sensors and actuators), has well-defined manufacturing capabilities and throughput capacities, it performs a segment of the manufacturing process, and is used for Level 3 functions (in a functional hierarchy)
+:::
 
 ### Position in the Life Cycle & Value Stream Axis
 
-The "Life cycle & value stream" axis is used to describe an asset at a particular point in time during its lifetime, from its conception and design, to its production and value-added use right up to its disposal. [@DIN_SPEC_91345]
+The Life cycle & value stream axis is used to describe an asset at a particular point in time during its lifetime, from its conception and design, to its production and value-added use right up to its disposal. [@DIN_SPEC_91345]
 
-The business and use case in consideration is operational usage. Thus the asset is an **instance in its Maintenance/Usage phase**.
+In this case the pick and place module is classified in the **instance** fase because it is already an object in the real world. Further more it is also in the **Maintenance/Usage** sub-phase because it is already operational (in use) and constantly improved (in maintenance).
 
 ### Architecture Layers
 
-The "Architecture Layers" axis describes the architecture in terms of properties and system structures with their functions and function-specific data in the form of layers.[@DIN_SPEC_91345]
+The Architecture Layers axis describes the architecture in terms of properties and system structures with their functions and function-specific data in the form of layers [@DIN_SPEC_91345].
 
-While the Hierarchy Levels axis and the Life Cycle & Value Stream axis are useful to determine **what** information is relevant given the context of a business and the specific asset, the Architecture Layers axis is useful to determine **how** the information can be digitized and digitalized, this is, how to translate the physical data into digital data and information (digitization) and how to use this digital information to provide value to a business (digitalization).
+![Architecture layers for station instance in maintenance/usage](img/rami-single-col.svg){#fig-rami-single-col}
 
-As mentioned before, the asset is a station instance in its maintenance/usage life cycle phase. Figure shows its positioning in the RAMI4.0.
+By navigating the RAMI4.0 the scope of the model is reduced. A visual representation of this process is shown in @fig-rami-single-col where each possible vertical column represents a set of data and information that describes the asset. Each of these columns can be considered a set of one or more digital twins of the asset. In this case only one column is of interest.
 
+The focus of this project is to translate the data of the pick and place station into digital data and information that enables and leverages the production of NFC business cards, as shown in @fig-architecture-layers.
 
+![Architecture Layers](img/architecture-layers.svg){#fig-architecture-layers width=80%}
 
-## Digital Factory
-asdfasdfasdf
+Notice that in @fig-architecture-layers there are two vertical arrows, one going from the business to the information layer, and another one going from the asset to the information layer. This is a top-down/bottom-up approach that allows a better understanding of the requirements of the actual implementation. The following is a description of this approach in the order mentioned.
 
-# Results
+Top-down:
 
+- Business Layer: The business is given by the organization. In this case the organization wants to produce NFC business cards.
+- Functional Layer: Once the business is known it is required to know what business or manufacturing functions enable this business. Examples here are: cutting the cards, engraving the information on the cards, transporting the cards.
+- Information Layer: Once the functions are determined it is required to know what information is consumed by these functions.
+
+Bottom-up:
+
+- Asset Layer: This determines the asset to digitalize. In this case it is the pick and place station.
+- Integration Layer: Once the asset is known it is required to determine how data can be read from the asset as well as written to the asset. In other words, how to interact with the asset digitally.
+- Communication Layer: Once the interaction with the asset is established it is required to transport the digital information in a Industrie 4.0-compliant way. This means that the information can be consumed by other Indutrie 4.0 components.
+
+:::{.callout-note}
+Notice that the bottom-up approach helps to determine **how** the information is transported and consumed. The top-down approach determines **what** information is needed and how it should be presented.
+:::
+
+# Implementation
+{{< include results.qmd >}}
 
 \newpage
 
