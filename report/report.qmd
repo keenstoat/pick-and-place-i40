@@ -9,7 +9,6 @@ examiners:
   - Prof. Dr. Armando Walter Colombo
   - M.Eng. Jeffrey Werman
 course: M.Eng. Industrial Informatics - Semester Project - SS 2024
-
 lang: en # default es en - auto captions quedan en este lenguaje
 
 format:
@@ -54,6 +53,9 @@ Industrie 4.0 refers to the intelligent networking of machines and processes for
 ### RAMI4.0
 The Plattform Industrie 4.0, in partnership with many other stakeholders, has created the **DIN SPEC 91345**. This DIN SPEC describes the RAMI4.0 which is a reference architecture model in the form of a cubic layer model, which provides an architecture for technical objects (assets) in the form of layers, and allows them to be described, tracked over their entire lifetime and assigned to technical and/or organizational hierarchies. It also describes the structure and function of Industrie 4.0 components as essential parts of the virtual representation of assets. [@DIN_SPEC_91345].
 
+### Asset Administration Shell
+asdfa;sfaskljdfak;
+
 ## Digital Factory
 
 asfa
@@ -61,13 +63,6 @@ asfa
 ### Pick and place module
 
 Worked previously under the name of Delta robot
-
-
-## FAAAST Service ?
-asdfasf
-
-
-
 
 
 
@@ -109,9 +104,9 @@ The role-based hierarchy defined in IEC62264 and the levels in the hierarchy axi
 In this case the pick and place module is classified as a **Station** 
 
 :::{.callout-note}
-A common definition of a Station is an asset that is composed of sensors and actuators. This is incomplete.
+A common, yet incomplete, definition of a station is an asset that is composed of sensors and actuators.
 
-A better definition of a Station is an asset that has the equipment to manipulate a product (has sensors and actuators), has well-defined manufacturing capabilities and throughput capacities, it performs a segment of the manufacturing process, and is used for Level 3 functions (in a functional hierarchy)
+A better definition of a station is an asset that has the equipment to manipulate a product (has sensors and actuators), has well-defined manufacturing capabilities and throughput capacities, it performs a segment of the manufacturing process, and is used for Level 3 functions (in a functional hierarchy)
 :::
 
 ### Position in the Life Cycle & Value Stream Axis
@@ -126,32 +121,80 @@ The Architecture Layers axis describes the architecture in terms of properties a
 
 ![Architecture layers for station instance in maintenance/usage](img/rami-single-col.svg){#fig-rami-single-col}
 
-By navigating the RAMI4.0 the scope of the model is reduced. A visual representation of this process is shown in @fig-rami-single-col where each possible vertical column represents a set of data and information that describes the asset. Each of these columns can be considered a set of one or more digital twins of the asset. In this case only one column is of interest.
+By navigating the RAMI4.0 the scope of the model is reduced to the maintenance and usage data of a station instance. A visual representation of this process is shown in @fig-rami-single-col where each possible vertical column represents a set of data and information that describes the asset in a more specific context. Each of these columns can be considered a set of one or more digital twins of the asset. Here the interest is then in one single column.
 
-The focus of this project is to translate the data of the pick and place station into digital data and information that enables and leverages the production of NFC business cards, as shown in @fig-architecture-layers.
+The focus of this project is to translate the operational data of the pick and place station into digital data and information that enables and leverages the production of NFC business cards, as shown in @fig-architecture-layers.
 
-![Architecture Layers](img/architecture-layers.svg){#fig-architecture-layers width=80%}
+![Architecture Layers Model](img/architecture-layers.svg){#fig-architecture-layers width=80%}
 
 Notice that in @fig-architecture-layers there are two vertical arrows, one going from the business to the information layer, and another one going from the asset to the information layer. This is a top-down/bottom-up approach that allows a better understanding of the requirements of the actual implementation. The following is a description of this approach in the order mentioned.
 
 Top-down:
 
-- Business Layer: The business is given by the organization. In this case the organization wants to produce NFC business cards.
-- Functional Layer: Once the business is known it is required to know what business or manufacturing functions enable this business. Examples here are: cutting the cards, engraving the information on the cards, transporting the cards.
-- Information Layer: Once the functions are determined it is required to know what information is consumed by these functions.
+- **Business Layer**: The business is given by the organization. In this case the organization wants to produce NFC business cards.
+- **Functional Layer**: Once the business is known it is required to know what business or manufacturing functions enable this business. Examples here are: cutting the cards, engraving the information on the cards, writing data to NFC chip of the card, transporting the cards. In this case a function is to pick and place cards for transportation, sorting, etc.
+- **Information Layer**: Once the functions are determined it is required to know what information is consumed by these functions.
 
 Bottom-up:
 
-- Asset Layer: This determines the asset to digitalize. In this case it is the pick and place station.
-- Integration Layer: Once the asset is known it is required to determine how data can be read from the asset as well as written to the asset. In other words, how to interact with the asset digitally.
-- Communication Layer: Once the interaction with the asset is established it is required to transport the digital information in a Industrie 4.0-compliant way. This means that the information can be consumed by other Indutrie 4.0 components.
+- **Asset Layer**: This determines the asset to digitalize. In this case it is the pick and place station.
+- **Integration Layer**: Once the asset is known it is required to determine how data can be read from the asset as well as written to the asset. In other words, how to interact with the asset digitally.
+- **Communication Layer**: Once the interaction with the asset is established it is required to transport the digital information in a Industrie 4.0-compliant way. This means that the information can be consumed by other Indutrie 4.0 components.
 
 :::{.callout-note}
 Notice that the bottom-up approach helps to determine **how** the information is transported and consumed. The top-down approach determines **what** information is needed and how it should be presented.
 :::
 
 # Implementation
-{{< include results.qmd >}}
+
+A model for the pick and place station as an Industrie 4.0 component has been created as shown in @fig-architecture-layers. This model is the basis for the implementation of the component using software and hardware tools.
+
+## Existing hardware and software
+
+As was seen in @fig-hierarchy-levels the pick and place station includes a Raspberry Pi as a control device. This adds an implementation detail which is that the AAS is to be embedded in the station as opposed to being hosted in a cloud.
+
+The Igus Delta robot has its own robot control hardware and software which implements a modbusTCP service. 
+
+There is an ESP32 board controlling the gripper.
+
+As a result from the previous work on the module there is a python library that interfaces with the robot control's modbusTCP service which greatly simplifies the interaction with the delta robot. There is also an Arduino based firmware for the ESP32 to control the gripper and a python library that wraps the communication to the board using a serial interface.
+
+## New implementations
+
+### AAS Package Explorer
+
+We want to use the AASX file which is created by the package explorer.
+
+Specifically, the information layer is to be implemented using an AAS and the communication layer is to be implemented using OPC UA. This implies the use of a tool that can expose the AAS information model as an OPC UA service. Moreover it is required to feed and consume real-time operational data through the OPC UA interface.
+
+### FA³ST Service
+A common way to implement an AAS is to export the AAS information model to the OPC UA NodeSet schema and then use this schema to create an OPC UA server. 
+
+This projects present a different way implement an AAS using the FA³ST service tool which takes the AASX package file and directly exposes the information model as an OPC UA service. The FA³ST service also provides an interface to feed and consume real-time data from the asset called AssetConnection.
+
+![FA³ST service overview[^1]](img/faaast-service-overview.png){#fig-fast-overview width=80%}
+
+[^1]: https://faaast-service.readthedocs.io/en/latest/_images/overview.png
+
+### HTTP API, Delta robot library, and Gripper firmware
+
+A new firmware was created to control the gripper. This firmware improves the communication by using JSON formatted messages which allow the exchange of status data from the gripper. more????
+
+The python library to communicate with the delta robot's modbusTCP service was reused and refactored for easier usage and maintenance.
+
+An HTTP API was created to implement the integration architecture layer. This API comes as a necessity because the FA³ST service asset connection only supports OPC UA, HTTP, and MQTT connections. From these three options an HTTP API is the easiest to implement.
+
+### Docker containers
+
+Finally, in order to keep the implementation free from software compatibility and integration issues, it was decided to use Docker containers as run environment. This way ???????
+
+@fig-pick-and-place-implementation shows a diagram of the actual implementation.
+
+![Pick and place station implementation diagram](img/pick-and-place-module.svg){#fig-pick-and-place-implementation}
+
+
+# Results
+
 
 \newpage
 
