@@ -1,0 +1,88 @@
+# Methodology
+
+This section describes how to use the RAMI4.0 as the theoretical basis to digitalize the pick and place module in the context of Industrie 4.0. The output of this section will provide the definitions, technologies, and requirements for the actual implementation.
+
+## Asset position in the RAMI 4.0
+
+The RAMI4.0 is a reference model that when applied yields a more concrete, implementation-independent model of the digitalization of an asset. In a broad sense applying the RAMI4.0 involves three steps: 
+
+1. Determine the position of the asset in the Hierarchy Levels axis. 
+2. Determine the position of the asset in the Life cycle & Value stream axis. 
+3. Determine definitions, technologies and general requirements of each architecture layer.
+
+Steps 1 and 2 help to determine **what** data and information is relevant to digitalize. Step 3 helps to determine **how** to digitalize the relevant data. This is, how the data and information is going to be made available to the business as shown in @fig-rami-application-steps.
+
+![Three-step application of the RAMI4.0](img/rami-application-steps.svg){#fig-rami-application-steps width=80%}
+
+The following three sections explain these steps in more detail.
+
+### Position in the Hierarchy Levels Axis
+
+The Hierarchy levels axis of the RAMI4.0 is based on the role-based hierarchy model of the IEC 62264[@IEC62264_1]. This axis describes the assets of an organization that are involved in the manufacturing and business processes. @fig-hierarchy-levels-diagram provides a broad picture of where the pick and place module is located in the hierarchy levels axis and how it relates to other components in the organization.
+
+![Hierarchy levels overview](img/hierarchy-levels-diagram.svg){#fig-hierarchy-levels-diagram}
+
+A common, yet incomplete, definition of a station is an asset that is composed of sensors and actuators. A better definition of a station is an asset that has the equipment to manipulate a product (has sensors and actuators), has well-defined manufacturing capabilities and throughput capacities, it performs a segment of the manufacturing process, and is used for Level 3 functions (functions of manufacturing operations management). For more details on this refer to [@IEC62264_1, chap. 5, "Hierarchy Models"]
+
+The pick and place module is then classified as a **Station**. 
+
+> *From now on "pick and place module" and "pick and place station" refer to the same asset.*
+
+
+### Position in the Life Cycle & Value Stream Axis
+
+The Life cycle & value stream axis is used to describe an asset at a particular point in time during its lifetime, from its conception and design, to its production and value-added use right up to its disposal[@DIN_SPEC_91345].
+
+Because the main goal is to digitalize real-time operational data then the pick and place station can be classified as an **instance** in **Usage** phase.
+
+### Architecture Layers
+
+The Architecture Layers axis describes the digitalization architecture in terms of properties and system structures with their functions and function-specific data in the form of layers [@DIN_SPEC_91345].
+
+![Architecture layers for station instance in maintenance/usage phase](img/rami-application-result.svg){#fig-rami-application-result}
+
+By applying the RAMI4.0, the scope of the generic model is reduced and focused on the digitalization of the maintenance/usage data of a station instance. A visual representation of the result of applying the RAMI4.0 is shown in @fig-rami-application-result. 
+
+A more concrete description of a solution can now be provided. The following subsections provide a description of each layer in relation to the pick and place station as well as the definitions, technology, and other general requirements for implementation. The actual description of the implementation will be described in @sec-implementation.
+
+#### Business Layer
+The business layer describes the commercial view. This can be understood not only as profit but also as what gives value to the organization. 
+
+The context in which the pick and place station provides value will be defined as: **Academic research and implementation of I4.0-compliant technologies**.
+
+
+#### Functional Layer
+This layer describes the logical functions that enable the business. In the context of Industrie 4.0 these functions are defined as Capabilities. Capabilities are implementation-independent descriptions of the function of a resource to achieve a certain effect in the physical or virtual world[@i4.0_capabilities]. 
+
+Capabilities can be described at various levels of abstraction allowing them to be more or less specific as well as composed of other capabilities. For example: "Transport" is a capability. "Pick and place" is a more specific way to transport so it can also be a capability. Further more, "Pick and place" can be composed of the "Grip" and "Move" capabilities.
+
+Capability descriptions are outside the scope of this project, still they provide a way to represent the logical functions defined in this layer.
+
+For the pick and place station a logical function would be the **"Pick and place"** capability.
+
+#### Information Layer
+This layer describes the data and information that is used by the functions in the functional layer.
+
+Industrie 4.0 introduces the concept of the Asset Administration Shell (AAS) submodels. AAS Submodels are representations of different aspects of an asset and are used to organize the data and information and provide a separation of concerns[@platform-i40-aas-part1, Annex A, section V, "The Concept of Submodels"].
+
+This project is focused on digitalizing real-time operational data so the information layer will include an **"Operational Data" submodel**. This submodel will contain properties and operations providing data such as the position of the delta robot as coordinate properties, a move operation, status of the robot movement, and so on.
+
+#### Communication Layer
+This layer describes the access to the information in an Industrie 4.0-compliant way. In other words, how to locate, read, and write the information.
+
+Part of the AAS definition is the description of services, interfaces and operations to access the information within. At the technology-specific level the information in the AAS can be accessed through HTTP, OPC UA, and MQTT interfaces[@platform-i40-aas-part2].
+
+As a requirement for this project the **communication must be done through OPC UA**.
+
+#### Integration Layer
+This layer describes how to read and write data from the asset (the physical world) into the information world. In other words, this layer represents a bridge that allows the communication layer to interact with the asset.
+
+An **HTTP API** will be used to integrate the asset's data with the upper layers.
+
+#### Asset Layer
+This layer describes the real world. In this case the asset is the **pick and place station**.
+
+@fig-architecture-layers-technologies shows an overview of the technologies and other definitions to be used for the architecture layers.
+
+![Architecture Layers technologies](img/architecture-layers-technologies.svg){#fig-architecture-layers-technologies width=80%}
+
