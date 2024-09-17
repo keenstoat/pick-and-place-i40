@@ -7,7 +7,7 @@ services:
     extra_hosts:
       - host.docker.internal:host-gateway
     volumes:
-      - /home/charles/repos/project-ss/aas/faaast:/faaast
+      - ./faaast:/faaast
     environment:
       faaast_model: /faaast/pick-and-place.aasx
       faaast_config: /faaast/config-opcua-http.json

@@ -24,7 +24,8 @@ format:
     number-sections: true
     lof: true
     cite-method: biblatex
-    links-as-notes: true
+    links-as-notes: false
+    tbl-cap-location: bottom
     include-in-header: 
         # this is required so lines in codeblocks are wrapped
         text: |
@@ -192,7 +193,7 @@ This layer describes the real world. In this case the asset is the **pick and pl
 
 # Implementation {#sec-implementation}
 
-This section describes the implementation-specific details for the digitalization of the pick and place station following from the architecture layers definitions, technologies, and requirements described in @sec-rami-architecture-layers. The output of this section will provide a description of the actual implementation in terms of software and hardware components in a way that the reader can replicate the solution and get it up and running.
+This section describes the implementation-specific details for the digitalization of the pick and place station following from the architecture layers definitions, technologies, and requirements described in @sec-rami-architecture-layers. The output of this section will provide a description of the actual implementation in terms of software and hardware components in a way that the reader can replicate it and get the same results.
 
 ## AAS and the AASX Package Explorer
 
@@ -277,12 +278,13 @@ If an operation returns a value then it must be returned in the `data` key of th
 
 ## Asset Integration
 
-A python application was created to integrate the delta robot and the gripper and expose their functions over an HTTP API. This application was specifically designed to integrate with the AAS OperationalData submodel properties and operations. This means that:
+A python application was created to integrate the delta robot and the gripper and expose their functions over an HTTP API. This application was specifically designed to integrate with the AAS OperationalData submodel properties and operations and its exposure through OPC UA. This following considerations were taken:
 
-- The HTTP API is not a REST API nor a general API for that matter
+- The HTTP API is not a REST API nor a general API for that matter. The API request and response payloads contain just the necessary data to work with the FA³ST Service asset connection interface.
 - The application implements just the necessary functions and API endpoints to sync the AAS property read-write and operation calls with the pick and place station.
-
-The choice to implement an HTTP API was made because the FA³ST service asset connection only supports OPC UA, HTTP, and MQTT interfaces and an HTTP API is the easiest option to implement.
+- Asset actions that take long to complete are executed asynchronosly by the HTTP API so that the overlying OPC UA method call is not blocked. 
+    - For example, the `moveRobot()` OPC UA method will start the action and will not block the client while the action is taking place. The property `isModuleBusy` tells the completion of the action.
+- The choice to implement an HTTP API was made because the FA³ST service asset connection only supports OPC UA, HTTP, and MQTT interfaces and an HTTP API is the easiest option to implement.
 
 For more information on this app refer to the [app's entrypoint script](integration/app/__main__.py)
 
@@ -318,7 +320,15 @@ A Raspberry Pi is used as the central platform for computation and communication
 
 Further more, to keep the overall implementation portable and free from software and system compatibility issues (or at least that is the goal!), it was decided to use Docker containers as execution environment. 
 
-All the necessary software is run upon system startup by a systemd service and orchestrated by a docker compose configuration. @fig-pick-and-place-station-implementation shows a component diagram of the implementation.
+The overall system must start upon system startup. For this it was added as a systemd service and orchestrated by Docker compose. 
+
+Systemd will start the pick-and-place service after the Docker service starts.
+
+Docker compose will start the FA³ST Service container after the Integration app container starts.
+
+Additionally a shell script was created to install the pick and place service and all its dependencies. 
+
+@fig-pick-and-place-station-implementation shows a component diagram of the architecture of the implementation.
 
 ![Pick and place station implementation](img/pick-and-place-station-implementation.svg){#fig-pick-and-place-station-implementation}
 
@@ -326,27 +336,77 @@ All the necessary software is run upon system startup by a systemd service and o
 
 # Results {#sec-results}
 
-Refer the reader to the source code for installation instructions and general documentation of the source code.
+This section presents the results of the implementation by showing an example of the interaction with the pick and place station through the exposed OPC UA service.
 
+## Installation
+The installation performs these actions:
+- Checks and/or installs dependencies
+- Builds the Docker images
+- Provisions the required input files for the FA³ST Service
+- Creates, configures, enables and starts the systemd service 
+- Waits for the OPC UA service to respond
+
+After the installation is complete the pick and place station's OPC UA server should be available at `opc.tcp://192.168.158.89:4840`. Where `192.168.158.89` is the IP address of the Raspberry Pi at the moment of this writing.
+
+The installation is completely idempotent. This means that every time it's run the result is always the same.
+
+## System Initialization 
+The Delta robot needs to be initialized everytime it is powered up. To do this, the `initializeModule()` method must be called. The initialization process will perform the robot's homing sequence. This might take a few seconds. When the initialization is done the property `isModuleInitialized` changes from `false` to `true`.
+
+## Real-time synchronization example
+This example will move the Delta robot by calling the `moveRobot()` method from an OPC UA client. The property values for the robot's coordinates will be updated in real-time while the robot moves.
+
+This example is using UAExpert as OPC UA client. @fig-module-status-before-action shows the UAExpert GUI with six properties being read to show the coordinates and speed of the robot. In the same order as the figure these are:
+
+1. isModuleInitialized = True
+2. tableDistance =  600
+3. robotSpeed =  100
+4. robotPosition.x =  0
+5. robotPosition.y =  0
+6. robotPosition.z =  300
+
+The `tableDistance` and `robotSpeed` are read-write properties, so to adjust them they just need to be edited.
+
+The `moveRobot` method call dialog shows the robot will be moved to the coordinates `x=100`,`y=98.89`, `z=200`.
+
+![Status of the module before action](img/call-moverobot-before.jpg){#fig-module-status-before-action}
+
+After calling the `moveRobot()` method the position of the Delta robot was updated in real-time in UAExpert. This is, while the robot is moving its coordinates can be seen changing in the UAExpert GUI. @fig-module-status-after-action shows the result of the call and the new coordinates of the robot. 
+
+> The Delta robot has a precision of 0.01 mm, thus the coordinate mismatch observed.
+
+![Status of the module after action](img/call-moverobot-after.jpg){#fig-module-status-after-action}
+
+The Delta robot's arms have now moved to the specified coordinates at the specified speed. @fig-robot-position-change shows the robot's position before and after the action.
+
+::: {#fig-robot-position-change layout="[[100,-5,100]]"}
+
+![Position before at `x=0`,`y=0`, `z=300`](img/robot-initial-position.jpg)
+
+![Position after at `x=100`,`y=98.89`, `z=200`](img/robot-final-position.jpg)
+
+Delta robot position before and after calling `moveRobot()`
+:::
+
+\newpage
 
 # Discussion and Future Works {#sec-discussion-and-future-works}
 
-The OPC UA service by the FA³ST service does not recognize the AAS value type "non negative integer", so such values as speed of the robot had to be set as integers.
+The OPC UA service implemented by the FA³ST service does not recognize the AAS value type "non negative integer", so values such as `robotSpeed` had to be set as full integers.
 
-A common way to implement the communication of an AAS is to export the AAS information model to an XML file as the OPC UA NodeSet schema, then use a programming language with a suitable framework which can take the XML file as input and create an OPC UA server following the schema. This option was not considered an option as it has been already used in other projects and it was considered a cumbersome way to proceed.
+A common way to implement an OPC UA service based on an AAS is to export the AAS information model to an OPC UA NodeSet schema XML file, then use a programming platform with a suitable framework which can take the XML file as input and create an OPC UA server following the schema. This option was not considered as it has been already presented in other projects and in this project the author wanted to present a new tool.
 
-A second option to consider was the [AASX Server](https://github.com/eclipse-aaspe/server) tool. While it does allow the implementation of the OPC UA server directly from the AASX file it does not have a native way to interact with the underlying asset. This means that the service implemented cannot provide real-time input/output of data.
+A second option to consider for AAS implementation is the [AASX Server](https://github.com/eclipse-aaspe/server) tool. While it does allow the implementation of the OPC UA server directly from the AASX file it does not have a native way to interact with the underlying asset. This means that the service implemented cannot provide real-time input/output of data with the asset.
 
-The FA³ST service has no docker image support for ARM based platforms such as the Raspberry Pi's. For this reason a custom docker image was created based on the actual docker image provided in the FA³ST project. This came with another obstacle which is that the FA³ST service requires JDK version 17 or greater the JDK distribution for ARM is not compatible with the compiler included in x86 platoforms. All of this just means that the FA³ST service custom docker image must be build in the Raspberry Pi.
+The FA³ST service has no Docker image support for ARM based architectures such as the Raspberry Pi's. For this reason a custom Docker image was created based on the actual Dockerfile provided in the FA³ST project source. This came with the obstacle that the FA³ST service requires JDK version 17 or greater and the JDK distribution for ARM is incompatible with the compiler included in x86_64 platforms. This incompatibility meant that the ARM-based Docker image for the FA³ST service cannot be built in x86_64 systems (even with the `--platform linux/arm/v8` option!). It had to be built in the Raspberry Pi. 
 
-Despite the pick and place module being operational it still lacks a lot of features to actually be an asset valuable to the Digital Factory. 
+Despite the pick and place module being somewhat operational it still lacks a lot of the features to actually be an asset valuable to the Digital Factory.
 
-So far the initial and final positions of the object to pick and place must be provided to the module, which is not useful except for prototyping as in this project. A proposal for a future project is to include an object visual recognition system in which the the module can recognize the objects to process, determine their position on the table, pick the object and place it in the specified final position.
+So far the initial and final positions of the object to pick and place must be provided to the module, which is not useful except for prototyping as in this project. 
 
-During the creation of this project the gripper was damaged to the point where it no longer opens or closes. The rotation still works but it is not precise. Despite these problems, the gripper was never able to actually grip something in a useful way. The integration of a new gripper with proper controls and feedback, better grip strength, and a smaller size is required.
+A proposal for a future project is to include an object visual recognition system in which the the module can recognize objects to process on the table base, determine their position on the table, pick the object in the determined position and place it in the specified final position. This would be useful for packaging, sorting, aligning, etc. objects based on color or shape.
 
-
-
+During the creation of this project the gripper was damaged to the point where it no longer opens or closes. The rotation still works but it is not precise nor firm. Despite these problems, the gripper was never really able to grip something in a useful way as it had not much gripping strength. The integration of a new gripper with proper controls and feedback, better grip strength, and a smaller size is considered imperative.
 
 \newpage
 

@@ -32,7 +32,11 @@ The report sources are found [here](./report).
 
 The installation consists on building the docker images and adding the systemd service so the OPC UA service starts upon system startup.
 
-First copy this project into the Raspberry Pi. Then run the following command with a sudoer user:
+First copy this project into the Raspberry Pi. 
+```bash
+```
+
+Then run the following command with a sudoer user:
 ```bash
 make install
 ```
