@@ -1,5 +1,5 @@
 ---
-title: Industrie 4.0-compliant Digitalization of a Pick and Place Module with Real-time Asset Integration within a Digital Factory
+title: Industrie 4.0-compliant Digitalization of a Pick and Place Module with Real-time Asset Integration
 # subtitle: Digitalization of a Pick and Place Module in the context of RAMI4.0
 logo: templates/HS_EmdenLeer_Logo.pdf
 date: today
@@ -9,7 +9,7 @@ examiners:
   - Prof. Dr. Armando Walter Colombo
   - M.Eng. Jeffrey Werman
 course: M.Eng. Industrial Informatics - Semester Project - SS 2024
-lang: en # default es en - auto captions quedan en este lenguaje
+lang: en
 
 format:
   pdf:
@@ -35,9 +35,9 @@ format:
 
 geometry: [left=3cm,right=3cm,top=2cm,bottom=3cm]
 fontsize: 11pt
-mainfont: Bitter
+mainfont: Bitter # https://fonts.google.com/specimen/Bitter
 sansfont: Bitter
-monofont: Ubuntu Mono
+monofont: Ubuntu Mono # https://fonts.google.com/specimen/Ubuntu+Mono
 linestretch: 1.25
 
 bibliography: references.bib
@@ -49,40 +49,40 @@ csl: https://raw.githubusercontent.com/citation-style-language/styles/master/eng
 
 # Abstract {.unnumbered}
 
-The Industrie 4.0 is a trend aimed at the digital transformation of different aspects of the economy. This digital transformation seeks to interconect equipment, processes, humans, and other assets of value to an organization by creating digital representations of them. 
+Industrie 4.0 is a trend aimed at the digital transformation of different aspects of the economy. This digital transformation seeks to interconnect equipment, processes, humans, and other assets of value to an organization by creating digital representations of them.
 
-The digital representation is called a digital twin and the assets can be anything from the real world be it tangible such as machinery, tools, and raw materials; and intagible such as software, processes, and even intellectual property. Digital twins enable the cooperation, collaboration and interoperability of assets in an enterprise.
+The digital representation is called a digital twin, and the assets can be anything from the real world, whether tangible (such as machinery, tools, and raw materials) or intangible (such as software, processes, and even intellectual property). Digital twins enable the cooperation, collaboration, and interoperability of assets within an enterprise.
 
-The Industrie 4.0 proposal for a digital twin is the Asset Administration Shell (AAS). The AAS contains all the information of that is necessary to represent an asset in the digital world.
+The Industrie 4.0 proposal for digital twins is the Asset Administration Shell (AAS) and its Submodules. These contain all the information necessary to represent an asset in the digital world.
 
-This report presents a project to create a functional prototype of an AAS-compliant digital twin for a pick and place module of the Digital Factory if the University of Applied Sciences in Emden, using the RAMI4.0 model as a theoretical background and the FA³ST service tool as the implementation technology. The project focuses on the real-time syncrhonization of the asset's data to and from the digital twin.
+This report presents a project to create a functional prototype of an AAS-compliant digital twin for a pick-and-place module at the Digital Factory of the University of Applied Sciences in Emden, using the RAMI4.0 model as the theoretical framework and the FA³ST service tool as the central implementation technology. The project focuses on the real-time synchronization of the asset's data to and from the digital twin.
 
 \newpage
 
 # Introduction
 
-The Plattform Industrie 4.0[@platformindustrie40] is a German government initiative aimed at advancing the the fourth industrial revolution. The Plattform Industrie 4.0 name for this concept is **Industrie 4.0**.
+The Plattform Industrie 4.0[@platformindustrie40] is a German government initiative aimed at advancing the fourth industrial revolution. The Plattform Industrie 4.0 name for the fourth industrial revolution is **Industrie 4.0**.
 
-Industrie 4.0 refers to the intelligent networking of machines and processes for industrie with the help of information and communication technology. Its fundamental purpose is to facilitate cooperation and collaboration between technical objects (assets), which means they have to be virtually represented and connected [@DIN_SPEC_91345].
+Industrie 4.0 refers to the intelligent networking of machines and processes for industrie with the help of information and communication technology. Its fundamental purpose is to facilitate cooperation and collaboration between technical objects (assets), which means they have to be virtually represented and connected[@DIN_SPEC_91345].
 
 ## RAMI4.0
-The Plattform Industrie 4.0, in partnership with many other stakeholders, has created the **DIN SPEC 91345**. This DIN SPEC describes the RAMI4.0 which is a reference architecture model and provides an architecture for technical objects (assets) in the form of layers, and allows them to be described, tracked over their entire lifetime and assigned to technical and/or organizational hierarchies. It also describes the structure and function of Industrie 4.0 components as essential parts of the virtual representation of assets. [@DIN_SPEC_91345]. @fig-rami-diagram shows a visual representation of the RAMI4.0.
+The Plattform Industrie 4.0, in partnership with many other stakeholders, has created the **DIN SPEC 91345**. This DIN SPEC describes the RAMI4.0 which is a reference architecture model and provides an architecture for technical objects (assets) in the form of layers, and allows them to be described, tracked over their entire lifetime and assigned to technical and/or organizational hierarchies. It also describes the structure and function of Industrie 4.0 components as essential parts of the virtual representation of assets[@DIN_SPEC_91345]. @fig-rami-diagram shows a visual representation of the RAMI4.0.
 
 ![RAMI4.0 model](img/rami-diagram.svg){#fig-rami-diagram fig-align="center"}
 
 ## Digital Factory
 
-The Digital Factory at the University of Applied Sciences in Emden is a flexible manufacturing system, which is used to demonstrate key concepts and features in the field of industrial digitalization and Industry 4.0.[@digital_factory].
+The Digital Factory at the University of Applied Sciences in Emden is a flexible manufacturing system, which is used to demonstrate key concepts and features in the field of industrial digitalization and Industry 4.0[@digital_factory].
 
 One of the key features of the design of the Digital Factory includes a modular approach, where individual functional parts of a production process are isolated in a modular frame. Each of these modules are designed to be self-contained, meaning they implement a specific production capability and include all necessary devices (e.g. power management, control devices, safety devices, etc.) and supplies inside the module. This way, each module is theoretically capable of being used by itself without the need of any other part of the system, but the full potential will be developed through collaboration with additional modules to allow a more complex production including different production steps. The modules are movable, allowing them to be placed flexibly on the Digital Factory’s shop floor and enabling a job shop production[@digital_factory]. 
 
 ![Digital Factory with 3 modules](img/digital-factory.jpg){#fig-digital-factory fig-align="center"}
 
-### Pick and place module {#sec-pick-and-place-module}
+### Pick and place module
 
-One of the modules in the Digital Factory is the pick and place module. Worked previously under the name of "Delta robot"[@delta_robot]. The module is composed of the following harware and software:
+One of the modules in the Digital Factory is the pick and place module. Worked previously under the project name of "Delta robot"[@delta_robot]. The module is composed of the following hardware and software:
 
-- An Igus 3-axis Delta Robot with its iRC robot control hosting a modbusTCP/IP service
+- An Igus 3-axis Delta Robot with its iRC Robot Control hosting a modbusTCP/IP service
 - An in-house made gripper controlled with an ESP32 development board 
 - A Raspberry Pi with Raspbian OS
 - A touch screen connected to the Raspberry Pi for desktop display and control
@@ -92,23 +92,27 @@ One of the modules in the Digital Factory is the pick and place module. Worked p
 
 ## Structure of this report
 
-This report is structured as follows: @sec-methodology describes the use of the RAMI4.0 to create a conceptual model of the digital twin. @sec-implementation describes the technologies, tools, design, and implementation of the digital twin following the model deviced in the previous section. @sec-results presents the results of the implementation by demonstrating its use. Finally, @sec-discussion-and-future-works discusses the most significant technical issues encountered and provides ideas for improvements and future works.
+This report is structured as follows: @sec-methodology describes the use of the RAMI4.0 to create a conceptual model of the digital twin along with technologies, definitions, and general requirements for its implementation. @sec-implementation describes the software and hardware tools, component design and implementation of the digital twin following the model from the previous section. @sec-results presents the results by demonstrating an interaction with the implementation. Finally, @sec-discussion-and-future-works discusses the most significant technical issues encountered and provides ideas and proposals for improvements and future works.
 
 \newpage
 
 # Methodology{#sec-methodology}
 
-This section describes how to use the RAMI4.0 as the theoretical basis to digitalize the pick and place module in the context of Industrie 4.0. The output of this section will provide the definitions, technologies, and requirements for the actual implementation.
+This section describes how to use the RAMI4.0 as the theoretical framework to design the digitalization the pick and place module in the context of Industrie 4.0. The output of this section will provide the definitions, technologies, and general requirements for the actual implementation.
 
 ## Asset position in the RAMI 4.0
 
-The RAMI4.0 is a reference model that when applied yields a more concrete, implementation-independent model of the digitalization of an asset. In a broad sense applying the RAMI4.0 involves three steps: 
+The RAMI4.0 is a reference model that when applied yields a more concrete, implementation-independent model of the digitalization of an asset. 
+
+> The RAMI4.0 being a reference model means that it's a model in which other models are based, albeit less generic.
+
+In a broad sense applying the RAMI4.0 involves three steps: 
 
 1. Determine the position of the asset in the Hierarchy Levels axis. 
 2. Determine the position of the asset in the Life cycle & Value stream axis. 
 3. Determine definitions, technologies and general requirements of each architecture layer.
 
-Steps 1 and 2 help to determine **what** data and information is relevant to digitalize. Step 3 helps to determine **how** to digitalize the relevant data. This is, how the data and information is going to be made available to the business as shown in @fig-rami-application-steps.
+Steps 1 and 2 help to determine **what** data and information is relevant to digitalize. Step 3 helps to determine **how** to digitalize the relevant data. This is, how the data and information of the asset is going to be made available to the business as shown in @fig-rami-application-steps.
 
 ![Three-step application of the RAMI4.0](img/rami-application-steps.svg){#fig-rami-application-steps width=70% fig-align="center"}
 
@@ -120,7 +124,7 @@ The Hierarchy levels axis of the RAMI4.0 is based on the role-based hierarchy mo
 
 ![Hierarchy levels overview](img/hierarchy-levels-diagram.svg){#fig-hierarchy-levels-diagram}
 
-A common, yet incomplete, definition of a station is an asset that is composed of sensors and actuators. A better definition of a station is an asset that has the equipment to manipulate a product (has sensors and actuators), has well-defined manufacturing capabilities and throughput capacities, it performs a segment of the manufacturing process, and is used for Level 3 functions (functions of manufacturing operations management). For more details on this refer to [@IEC62264_1, chap. 5, "Hierarchy Models"]
+A common, yet incomplete, definition of a station is "an asset that is composed of sensors and actuators". A better definition of a station is an asset that has the equipment to manipulate a product (has sensors and actuators), has well-defined manufacturing capabilities and throughput capacities, it performs a segment of the manufacturing process, and is used for Level 3 functions (functions of manufacturing operations management). For more details refer to [@IEC62264_1, chap. 5, "Hierarchy Models"]
 
 The pick and place module is then classified as a **Station**. 
 
@@ -131,73 +135,89 @@ The pick and place module is then classified as a **Station**.
 
 The Life cycle & value stream axis is used to describe an asset at a particular point in time during its lifetime, from its conception and design, to its production and value-added use right up to its disposal[@DIN_SPEC_91345].
 
-Because the main goal is to digitalize real-time operational data then the pick and place station can be classified as an **instance** in **Usage** phase.
+Because the main goal is to digitalize real-time operational data then the pick and place station can be classified as an **instance** in the **Usage** phase.
 
 ### Architecture Layers {#sec-rami-architecture-layers}
 
-The Architecture Layers axis describes the digitalization architecture in terms of properties and system structures with their functions and function-specific data in the form of layers [@DIN_SPEC_91345].
+The Architecture Layers axis describes the digitalization architecture in terms of properties and system structures with their functions and function-specific data in the form of layers[@DIN_SPEC_91345].
 
 ![Architecture layers for station instance in maintenance/usage phase](img/rami-application-result.svg){#fig-rami-application-result}
 
-By applying the RAMI4.0, the scope of the generic model is reduced and focused on the digitalization of the maintenance/usage data of a station instance. A visual representation of the result of applying the RAMI4.0 is shown in @fig-rami-application-result. 
+By applying the RAMI4.0, the scope of its generic model is reduced and focused on the **digitalization of the maintenance/usage data of a station instance**. A visual representation of the result of applying the RAMI4.0 is shown in @fig-rami-application-result. 
 
-A more concrete description of a solution can now be provided. The following subsections provide a description of each layer in relation to the pick and place station as well as the definitions, technology, and other general requirements for implementation. The actual description of the implementation will be described in @sec-implementation.
-
-<!-- needed because document breaks page after the title -->
-\newpage
+A more concrete description of a solution can now be provided. The following subsections provide a description of each architecture layer in relation to the pick and place station as well as the definitions, technology, and other general requirements for implementation.
 
 #### Business Layer
 The business layer describes the commercial view. This can be understood not only as profit but also as what gives value to the organization. 
 
-The context in which the pick and place station provides value will be defined as: **Academic research and implementation of I4.0-compliant technologies**.
-
+The context in which the pick and place station provides value in the Digital Factory is as: **Academic research and implementation of I4.0-compliant technologies**.
 
 #### Functional Layer
 This layer describes the logical functions that enable the business. In the context of Industrie 4.0 these functions are defined as Capabilities. Capabilities are implementation-independent descriptions of the function of a resource to achieve a certain effect in the physical or virtual world[@i4.0_capabilities]. 
 
-Capabilities can be described at various levels of abstraction allowing them to be more or less specific as well as composed of other capabilities. For example: "Transport" is a capability. "Pick and place" is a more specific way to transport so it can also be a capability. Further more, "Pick and place" can be composed of the "Grip" and "Move" capabilities.
+Capabilities can be described at various levels of abstraction allowing them to be more or less specific as well as composed of other capabilities. For example: "Transport" is a capability. "Pick and place" is a more specific way to transport, so it can also be a capability. Furthermore, "Pick and place" can be composed of the "Grip" and "Move" capabilities.
 
 Capability descriptions are outside the scope of this project, still they provide a way to represent the logical functions defined in this layer.
 
-For the pick and place station a logical function would be the **"Pick and place"** capability.
+For the pick and place station a logical function is the **"Pick and place"** capability.
 
 #### Information Layer
 This layer describes the data and information that is used by the functions in the functional layer.
 
 Industrie 4.0 introduces the concept of the Asset Administration Shell (AAS) submodels. AAS Submodels are representations of different aspects of an asset and are used to organize the data and information and provide a separation of concerns[@platform-i40-aas-part1, Annex A, section V, "The Concept of Submodels"].
 
-Using the AAS is a requirement for this project.
+For the digitalization to be Industrie 4.0-compliant then the AAS must be used. Also it is a requirement for this project.
 
-Because this project is focused on digitalizing real-time operational data then the information layer will include an **"Operational Data" submodel**. This submodel will contain properties and operations providing data such as the position of the delta robot as coordinate properties, a move operation, status of the robot movement, and so on.
+Because this project is focused on digitalizing real-time operational data then the information layer will include an **"Operational Data" submodel**. This submodel will contain properties and operations providing data including (but not limited to) the position of the delta robot as cartesian coordinates, a move operation, status of the robot movement.
 
 #### Communication Layer
-This layer describes the access to the information in an Industrie 4.0-compliant way. In other words, how to locate, read, and write the information.
+This layer describes the access to the information in an Industrie 4.0-compliant way. In simple words, how to locate, read, and write the information.
 
 Part of the AAS definition is the description of services, interfaces, and interface operations to access the information within. At the technology-specific level the information in the AAS can be accessed through HTTP, OPC UA, and MQTT interfaces[@platform-i40-aas-part2].
 
 As a requirement for this project the **communication must be done through OPC UA**.
 
 #### Integration Layer
-This layer describes how to read and write data from the asset (the physical world) into the information world. In other words, this layer represents a bridge that allows the communication layer to interact with the asset.
+This layer describes how to read and write data between the asset (the physical world) and the digital twin (the information world). In other words, this layer represents a bridge that allows the communication layer to interact with the asset.
 
-An **HTTP API** will be used to integrate the asset's data with the upper layers.
+An **HTTP API** will be used to integrate the asset's data with the upper layers. This decision is heavily influenced by the implementation details as it will be seen in later sections.
 
 #### Asset Layer
 This layer describes the real world. In this case the asset is the **pick and place station**.
 
 @fig-architecture-layers-technologies shows an overview of the technologies and other definitions to be used for the architecture layers.
 
-![Architecture Layers technologies](img/architecture-layers-technologies.svg){#fig-architecture-layers-technologies width=50% fig-align="center"}
+![Architecture Layers technologies](img/architecture-layers-technologies.svg){#fig-architecture-layers-technologies width=80% fig-align="center"}
 
 \newpage
 
 # Implementation {#sec-implementation}
 
-This section describes the implementation-specific details for the digitalization of the pick and place station following from the architecture layers definitions, technologies, and requirements described in @sec-rami-architecture-layers. The output of this section will provide a description of the actual implementation in terms of software and hardware components in a way that the reader can replicate it and get the same results.
+This section describes the implementation-specific details for the digitalization of the pick and place station following from the architecture layers definitions, technologies, and requirements described in @sec-rami-architecture-layers. The output of this section will provide a description of the actual implementation in terms of software and hardware components.
 
 ## AAS and the AASX Package Explorer
 
-The AASX Package Explorer is a tool to view, create, and edit AAS[@eclipse_aaspe]. Version 3 of the AASX Package Explorer was used to create the information model of the AAS of the pick and place station. The general structure is as follows:
+The AASX Package Explorer is a tool to view, create, and edit AAS[@eclipse_aaspe]. Version 3 of the AASX Package Explorer was used to create the information model of the AAS of the pick and place station. Three submodels are included in the AAS. 
+
+### Digital Nameplate Submodel
+
+The digital nameplate submodel aims to provide asset nameplate information to the respective Asset Administration Shells in an interoperable manner[@digital_nameplate_submodel]. This submodel is based on the template provided by the IDTA[@digital_nameplate_submodel_template]. @fig-digital-nameplate-submodel shows the AASX Package Explorer GUI for this submodel. 
+
+![Digital Nameplate Submodel](img/digital-nameplate-submodel.jpg){#fig-digital-nameplate-submodel}
+
+### Handover Documentation Submodel
+
+The handover documentation submodel defines a standardized exchange format for information or documentation for a specific asset. The scope of this Submodel is to increase the interoperability between the parties that are exchanging asset documentation [@handover_documentation_submodel]. This submodel is based on the template provided by the IDTA[@handover_documentation_submodel_template]. @fig-handover-documentation-submodel shows the AASX Package Explorer GUI for this submodel. 
+
+![Handover Documentation Submodel](img/handover-documentation-submodel.jpg){#fig-handover-documentation-submodel}
+
+### Operational Data Submodel
+
+The operational data submodel is a custom submodel created for this project. It models the data and information of the pick and place station as properties and operations. It is designed to have a flat structure to make it easier to interface. @fig-operational-data-submodel shows the AASX Package Explorer GUI for this submodel. 
+
+![Operational Data Submodel](img/operational-data-submodel.jpg){#fig-operational-data-submodel}
+
+Because this submodel is the main focus of this project its general structure is presented as follows:
 
 + **`AAS`**: `PickAndPlaceAAS`
   + **`Submodel`**: `OperationalData`
@@ -233,11 +253,7 @@ The AASX Package Explorer is a tool to view, create, and edit AAS[@eclipse_aaspe
         + **`in`** \textcolor{magenta}{\texttt{float}} `objectHeight`
         + **`out`** \textcolor{magenta}{\texttt{string}} `result`
 
-Notice that the `moveRobot()` and `moveGripper()` operation's input properties are strings although they should take numeric values. By design the client must be able to move the robot or the gripper in a subset of directions but when exposed as an OPCUA method the server requires all values to be passed in. By defining them as strings the client can pass an empty string as the value of `x`, for example, and this means that the robot will not move in the `x` direction.
-
-@fig-aaspe shows the GUI of the AASX Package Explorer with the OperationalData submodel expanded out.
-
-![AAS Package Explorer GUI](img/aaspe.png){#fig-aaspe}
+Notice that the `moveRobot()` and `moveGripper()` operation's input properties are strings although they should take numeric values. By design the client must be able to move the robot or the gripper in a subset of directions but when exposed as an OPC UA method the server requires all values to be passed in. By defining them as strings the client can pass an empty string as the value of `x`, for example, and this means that the robot will not move in the `x` direction.
 
 ## FA³ST Service
 
@@ -249,28 +265,38 @@ This project presents a new way to implement an AAS using the FA³ST service[@fr
 
 ### Endpoint and Asset Connections {#sec-endpoint-and-asset-connections}
 
-To expose the AAS through an OPC UA service as well as to synchronize the AAS with the pick and place station data the FA³ST service is configured with an OPC UA endpoint and an HTTP asset connection. This section describes the strategies considered for this custom implementation based on the interfaces offered by the tool. For documentation on the FA³ST service configuration refer to [@faaast_service_documentation].
+To expose the AAS through an OPC UA service as well as to synchronize the AAS with the pick and place station data the FA³ST service is configured with an OPC UA endpoint and an HTTP asset connection. The choice to implement an HTTP API as asset integration was made because the FA³ST service asset connection only supports OPC UA, HTTP, and MQTT interfaces and an HTTP API is the easiest option to implement. 
 
-Two design considerations were used to structure the mappings between the AAS submodel elements and the HTTP API endpoints. This allows to decouple their implementation, allow for horizontal scalability, and make it easier to keep track of all the mappings.
+This section describes the design strategies considered for this custom implementation based on the interfaces offered by the tool. For official documentation on the FA³ST service configuration refer to [@faaast_service_documentation].
+
+Three design considerations were used to structure the mappings between the AAS submodel elements and the HTTP API endpoints. This allows to decouple their implementation, allow for horizontal scalability, and make it easier to keep track of all the mappings. These are:
 
 1. The HTTP API endpoints will use the same path hierarchy as the AAS information model, starting from the submodel name and respecting the case.
-2. All payload data (in requests and responses) must be in JSON format and must be structured as an object with the actual data in the `data` key. Examples are:
-```JSON
-// scalars
-{"data": 33.9}
-// objects
-{"data": {"success": false, "msg": "compilation error"}}
-```
+2. All payload data (requests and responses) must be in JSON format and must be structured as an object with the actual data in the `data` key. Examples:
+
+    ```JSON
+    // number, strings, and other scalars
+    {"data": 33.9}
+    // objects
+    {"data": {"success": false, "msg": "compilation error"}}
+    ```
+3. The name used for the AAS operation's properties will also be used as keys for HTTP request payload data. 
+    
+    Example: AAS Operation `myFunction(param1, param2)` is mapped as:
+
+    ```JSON
+    {"param1": param1, "param2": param2}
+    ```
 
 #### Read and write properties
-@fig-fast-asset-connection-property shows an example of how read and write work on a property. This is valid for value and subscription providers. Notice that to read a value from the HTTP API the asset connection uses a GET request (GET requests don't have payload) and to write a value to the HTTP API it uses a POST request. The response payload of the POST request does not matter because the AAS property is updated independently. 
+@fig-fast-asset-connection-property shows an example of how the read and write operations work on a property. This is valid for value and subscription providers. Notice that to read a value from the HTTP API the asset connection uses a GET request (GET requests don't have a payload) and to write a value to the HTTP API it uses a POST request. The response payload of the POST request does not matter because the AAS property is updated independently. 
 
 If a POST request fails (response returns anything other than a 2XX status code) then the AAS property is not updated.
 
 ![FA³ST asset connection for property read/write](img/fast-asset-connection-property.svg){#fig-fast-asset-connection-property}
 
 #### Calling operations
-@fig-fast-asset-connection-operation shows an example of how an operation call works. This is valid for operation providers. Notice that the asset connection uses a POST request with a payload structured so that the input values of the operation are mapped to a key with the same name.
+@fig-fast-asset-connection-operation shows an example of how an operation call works. This is valid for operation providers. Notice that the asset connection uses a POST request with a payload structured so that the input values of the operation are mapped to a key with the same name, as defined in the design considerations.
 
 If an operation returns a value then it must be returned in the `data` key of the response payload.
 
@@ -278,15 +304,13 @@ If an operation returns a value then it must be returned in the `data` key of th
 
 ## Asset Integration
 
-A python application was created to integrate the delta robot and the gripper and expose their functions over an HTTP API. This application was specifically designed to integrate with the AAS OperationalData submodel properties and operations and its exposure through OPC UA. This following considerations were taken:
+The asset integration must implement an HTTP API that receives and responds data based on the three considerations defined in @sec-endpoint-and-asset-connections.
+
+A python application was created to integrate the delta robot and the gripper and expose their functions over an HTTP API. This application was specifically designed to integrate with the AAS OperationalData submodel properties and operations and its exposure through OPC UA. The following considerations were taken:
 
 - The HTTP API is not a REST API nor a general API for that matter. The API request and response payloads contain just the necessary data to work with the FA³ST Service asset connection interface.
 - The application implements just the necessary functions and API endpoints to sync the AAS property read-write and operation calls with the pick and place station.
-- Asset actions that take long to complete are executed asynchronosly by the HTTP API so that the overlying OPC UA method call is not blocked. 
-    - For example, the `moveRobot()` OPC UA method will start the action and will not block the client while the action is taking place. The property `isModuleBusy` tells the completion of the action.
-- The choice to implement an HTTP API was made because the FA³ST service asset connection only supports OPC UA, HTTP, and MQTT interfaces and an HTTP API is the easiest option to implement.
-
-For more information on this app refer to the [app's entrypoint script](integration/app/__main__.py)
+- Asset actions that take long to complete are executed asynchronosly by the HTTP API so that the overlying OPC UA method call is not blocked. For example, the `moveRobot()` OPC UA method will start the action and will not block the client while the action is taking place. The property `isModuleBusy` tells the completion of the action.
 
 ### Delta robot
 
@@ -294,41 +318,37 @@ The delta robot is controlled by its own robot control system, iRC Robot Control
 
 The previous project provided a python library[@delta_robot_python_lib] that abstracted the input and output to the robot's modbus coils and registers as functions making it easier to execute commands and read and write data to the robot.
 
-This python library was imported into this project, refactored, and improved. The most important improvement is on the homing sequence that initializes the robot. This homing sequence has to be run everytime the robot is started.
-
-For details on the new delta robot python library refer to the [delta_robot.py script](integration/app/delta_robot/delta_robot.py)
+This python library was imported into this project, refactored, and improved. The most important improvement is on the homing sequence that initializes the robot. This homing sequence has to be run every time the robot is started.
 
 ### Gripper
 
-The gripper is controlled by an ESP32 board. The communication with the ESP32 board is over a serial interface physically connected through a USB cable.
+The gripper is controlled by a custom firmware running on an ESP32 board. The communication with the ESP32 board is over a serial interface physically connected through a USB cable.
 
-The previous project implemented a daemon process that would continually read two variables from the delta robot's modbus registers. One would define the rotation and the other the opening of the gripper. These two values would then be sent to the ESP32, over the serial interface, as two numbers separated by a space[@gripper_firmware]. This implementation essentially couples the gripper to the delta robot.
+The previous project implemented a daemon process that would continually read two variables from the delta robot's modbus registers. One would define the rotation and the other the opening of the gripper. These two values would then be sent to the ESP32, over the serial interface, as two numbers separated by an empty space[@gripper_firmware]. This implementation essentially hard-couples the gripper to the delta robot.
 
-This project makes two improvements over the gripper control:
+This project makes two improvements to the gripper control:
 
-1. The gripper control firmware now accepts data as JSON formatted strings which allow to issue commands to open and close the gripper independently as well as request status data. For example, the following command rotates the gripper to the 120 degree position:
-```json
-{"action": "rotate", "value": 120, "relative": false}
-```
-2. The communication with the gripper is now completely decoupled from the delta robot. A python library was created to directly interface with the ESP32 serial interface.
+1. The gripper control firmware now accepts data as JSON formatted strings which allow issuing commands to open/close and rotate the gripper as independent actions as well as request status data such as the current rotation and opening. For example, the following command rotates the gripper to the 120 degree position:
 
-For details on the new gripper firmware refer to its [README doc](integration/esp32/README.md).
+    ```JSON
+    {"action": "rotate", "value": 120, "relative": false}
+    ```
+2. The communication with the gripper is now completely decoupled from the Delta robot. A python library was created to directly interface with the ESP32 serial interface without requiring the Delta robot at all.
 
 ## Running Application Environment
 
-A Raspberry Pi is used as the central platform for computation and communication for the pick and place station. When speaking about the Raspberry Pi as a platform it must be undestood that this includes the hardware as well as the operating system.
+A Raspberry Pi is used as the central platform for computation and communication for the pick and place station. When speaking about the Raspberry Pi as a platform it must be understood that this includes the hardware as well as the operating system.
 
-Further more, to keep the overall implementation portable and free from software and system compatibility issues (or at least that is the goal!), it was decided to use Docker containers as execution environment. 
+Furthermore, Docker containers are used as execution environment to keep the overall implementation portable and free from software and system compatibility issues (or at least that is the goal!).
 
-The overall system must start upon system startup. For this it was added as a systemd service and orchestrated by Docker compose. 
+Additionally, the overall system must start upon OS system startup. To achieve this a systemd service was enabled and the Docker containers are orchestrated using Docker compose. Simply put:
 
-Systemd will start the pick-and-place service after the Docker service starts.
+- Systemd will start the pick-and-place service after the Docker service starts.
+- Docker compose will start the FA³ST Service container after the Integration app container starts.
 
-Docker compose will start the FA³ST Service container after the Integration app container starts.
+Finally, a shell script was created to install the pick and place service and all its dependencies. 
 
-Additionally a shell script was created to install the pick and place service and all its dependencies. 
-
-@fig-pick-and-place-station-implementation shows a component diagram of the architecture of the implementation.
+@fig-pick-and-place-station-implementation shows a component diagram of the overall architecture of the implementation.
 
 ![Pick and place station implementation](img/pick-and-place-station-implementation.svg){#fig-pick-and-place-station-implementation}
 
@@ -340,40 +360,46 @@ This section presents the results of the implementation by showing an example of
 
 ## Installation
 The installation performs these actions:
+
 - Checks and/or installs dependencies
 - Builds the Docker images
 - Provisions the required input files for the FA³ST Service
 - Creates, configures, enables and starts the systemd service 
-- Waits for the OPC UA service to respond
+- Waits for the OPC UA service to start up
 
 After the installation is complete the pick and place station's OPC UA server should be available at `opc.tcp://192.168.158.89:4840`. Where `192.168.158.89` is the IP address of the Raspberry Pi at the moment of this writing.
 
 The installation is completely idempotent. This means that every time it's run the result is always the same.
 
+The UAExpert OPC UA client is used to explore the implemented service. @fig-uaexpert-connected shows the Pick and Place AAS and its submodules served over the OPC UA service running in the Raspberry Pi.
+
+![Pick and Place OPC UA service in UAExpert](img/uaexpert-connected.png){#fig-uaexpert-connected width=90%}
+
 ## System Initialization 
-The Delta robot needs to be initialized everytime it is powered up. To do this, the `initializeModule()` method must be called. The initialization process will perform the robot's homing sequence. This might take a few seconds. When the initialization is done the property `isModuleInitialized` changes from `false` to `true`.
+The Delta robot needs to be initialized every time it is powered up. To do this, the `initializeModule()` method must be called. The initialization process will perform the robot's homing sequence. This might take a few seconds. When the initialization is done the property `isModuleInitialized` changes from `false` to `true`.
 
-## Real-time synchronization example
-This example will move the Delta robot by calling the `moveRobot()` method from an OPC UA client. The property values for the robot's coordinates will be updated in real-time while the robot moves.
+## Real-time data synchronization
+This example will move the Delta robot by calling the `moveRobot()` method. The property values for the robot's coordinates will be updated in real-time while the robot moves.
 
-This example is using UAExpert as OPC UA client. @fig-module-status-before-action shows the UAExpert GUI with six properties being read to show the coordinates and speed of the robot. In the same order as the figure these are:
-
+@fig-module-status-before-action shows the UAExpert GUI with six properties being read to show the coordinates and speed of the robot. In the same order as the figure these are:
+```markdown
 1. isModuleInitialized = True
-2. tableDistance =  600
-3. robotSpeed =  100
-4. robotPosition.x =  0
-5. robotPosition.y =  0
-6. robotPosition.z =  300
+2. tableDistance = 600
+3. robotSpeed = 100
+4. robotPosition.x = 0
+5. robotPosition.y = 0
+6. robotPosition.z = 300
+```
 
-The `tableDistance` and `robotSpeed` are read-write properties, so to adjust them they just need to be edited.
+The `tableDistance` and `robotSpeed` are read-write properties, so to adjust them they just need to be edited in the client.
 
-The `moveRobot` method call dialog shows the robot will be moved to the coordinates `x=100`,`y=98.89`, `z=200`.
+The `moveRobot` method call dialog shows the robot will be moved to the coordinates `x=100`, `y=98.89`, `z=200`.
 
 ![Status of the module before action](img/call-moverobot-before.jpg){#fig-module-status-before-action}
 
 After calling the `moveRobot()` method the position of the Delta robot was updated in real-time in UAExpert. This is, while the robot is moving its coordinates can be seen changing in the UAExpert GUI. @fig-module-status-after-action shows the result of the call and the new coordinates of the robot. 
 
-> The Delta robot has a precision of 0.01 mm, thus the coordinate mismatch observed.
+> The Delta robot has a precision of 0.01 mm, thus the coordinates value mismatch observed.
 
 ![Status of the module after action](img/call-moverobot-after.jpg){#fig-module-status-after-action}
 
@@ -381,9 +407,9 @@ The Delta robot's arms have now moved to the specified coordinates at the specif
 
 ::: {#fig-robot-position-change layout="[[100,-5,100]]"}
 
-![Position before at `x=0`,`y=0`, `z=300`](img/robot-initial-position.jpg)
+![Position before at `x=0`, `y=0`, `z=300`](img/robot-initial-position.jpg)
 
-![Position after at `x=100`,`y=98.89`, `z=200`](img/robot-final-position.jpg)
+![Position after at `x=100`, `y=98.89`, `z=200`](img/robot-final-position.jpg)
 
 Delta robot position before and after calling `moveRobot()`
 :::
@@ -404,9 +430,9 @@ Despite the pick and place module being somewhat operational it still lacks a lo
 
 So far the initial and final positions of the object to pick and place must be provided to the module, which is not useful except for prototyping as in this project. 
 
-A proposal for a future project is to include an object visual recognition system in which the the module can recognize objects to process on the table base, determine their position on the table, pick the object in the determined position and place it in the specified final position. This would be useful for packaging, sorting, aligning, etc. objects based on color or shape.
+A proposal for a future project is to include an object visual recognition system in which the module can recognize objects to process on the table base, resolve their position on the table, pick the object in the resolved position and place it in a specified final position. This would be useful, for example, for packaging, sorting, aligning, etc. objects based on color or shape.
 
-During the creation of this project the gripper was damaged to the point where it no longer opens or closes. The rotation still works but it is not precise nor firm. Despite these problems, the gripper was never really able to grip something in a useful way as it had not much gripping strength. The integration of a new gripper with proper controls and feedback, better grip strength, and a smaller size is considered imperative.
+During the creation of this project the gripper was damaged to the point where it no longer opens or closes. The rotation still works but it is not precise nor firm. Despite these problems, the gripper was never really able to grip something in a useful way as it had not much gripping strength. The integration of a new gripper with proper controls and feedback, greater grip strength and precision, and a smaller size is considered imperative.
 
 \newpage
 

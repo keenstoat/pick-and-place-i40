@@ -1,12 +1,54 @@
-# Industrie 4.0-compliant Digitalization of a Pick and Place Module with Real-time Asset Integration within a Digital Factory
+# Industrie 4.0-compliant Digitalization of a Pick and Place Module with Real-time Asset Integration
 
-This report presents a project to create a functional prototype of an AAS-compliant digital twin for a pick and place module of the Digital Factory if the University of Applied Sciences in Emden, using the RAMI4.0 model as a theoretical background and the FA³ST service tool as the implementation technology. The project focuses on the real-time syncrhonization of the asset's data to and from the digital twin. ???????????
+This repository contains the sources for a functional prototype of an AAS-compliant digital twin for a pick-and-place module at the Digital Factory of the University of Applied Sciences in Emden. It uses the RAMI4.0 model as the theoretical framework and the FA³ST service tool as the central implementation technology. The project focuses on the real-time synchronization of the asset's data to and from the digital twin.
 
-## Project structure
+The figures below show the pick and place module and a component diagram of the implementation.
 
-The project has two main areas:
-1. The implementation source code 
-2. The report source code
+<p align="center">
+<img src="./report/img/pick-and-place-station-components.svg" width="60%"/>
+</p>
+
+<table>
+    <tr>
+        <th>Pick and Place module</th>
+        <th>Implementation Component Diagram</th>
+    </tr>
+    <tr>
+        <td width="60%">
+            <img src="./report/img/pick-and-place-station-components.svg" />
+        </td>
+        <td >
+            <img src="./report/img/pick-and-place-station-implementation.svg" />
+        </td>
+    </tr>
+</table>
+
+## Installation
+
+As it can be seen in the component diagram, the implementation is composed of two main applications:
+- An AAS served as an OPC UA service
+- A python application to interface with the module.
+
+Each component is encapsulated in a Docker container. This keeps the implementation free from software and hardware compatibility issues (at least this is the goal!).
+
+The installation sets up all dependencies required and consists on building the docker images and adding a systemd service so the OPC UA service starts upon system startup.
+
+### Installation steps
+
+First, copy this project into the Raspberry Pi. Make sure to use a user that has sudo permissions.
+
+```bash
+rsync -a --delete ${PROJECT_ROOT}/ <user>@<hostname>
+```
+
+Then login (SSH or other) to the Raspberry Pi and run the [install script](./install.sh).
+
+```bash
+./install.sh
+```
+
+You should see a successful output.
+
 
 ### Implementation Source
 
@@ -16,7 +58,7 @@ The source code is divided into:
 
 The diagram below shows how these two components make up the final implementation.
 
-<img src="./report/img/pick-and-place-station-implementation.svg" width="50%">
+
 
 ### Report Source
 
@@ -28,21 +70,6 @@ The report PDF file is found [here](./report/report.pdf).
 
 The report sources are found [here](./report).
 
-## Installation
-
-The installation consists on building the docker images and adding the systemd service so the OPC UA service starts upon system startup.
-
-First copy this project into the Raspberry Pi. 
-```bash
-```
-
-Then run the following command with a sudoer user:
-```bash
-make install
-```
-> I believe that the best documentation for source code should be the source code itself, so don't be afraid to take a look underneath the hood!
->
-> Never the less, the is a README file here and there for general guidance and rationale.
 
 ## Connecting to the OPC UA service
 
