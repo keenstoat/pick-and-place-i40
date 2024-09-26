@@ -195,6 +195,8 @@ This layer describes the real world. In this case the asset is the **pick and pl
 
 This section describes the implementation-specific details for the digitalization of the pick and place station following from the architecture layers definitions, technologies, and requirements described in @sec-rami-architecture-layers. The output of this section will provide a description of the actual implementation in terms of software and hardware components.
 
+The source code can be found in the [pick-and-place-i40 GitHub Repository](https://github.com/keenstoat/pick-and-place-i40).
+
 ## AAS and the AASX Package Explorer
 
 The AASX Package Explorer is a tool to view, create, and edit AAS[@eclipse_aaspe]. Version 3 of the AASX Package Explorer was used to create the information model of the AAS of the pick and place station. Three submodels are included in the AAS. 
