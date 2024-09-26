@@ -69,9 +69,11 @@ sudo apt install ghostscript
 
 Then run the following command:
 ```bash
-gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/printer \
+gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/default \
 -dNOPAUSE -dQUIET -dBATCH \
 -sOutputFile=report-compressed.pdf report.pdf
 ```
+
+or just execute the `compresspdf.sh` script.
 
 More info [here](https://www.digitalocean.com/community/tutorials/reduce-pdf-file-size-in-linux).

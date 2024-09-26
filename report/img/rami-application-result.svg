@@ -2,9 +2,9 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   width="193.65134mm"
-   height="145.19501mm"
-   viewBox="0 0 203.18202 152.34088"
+   width="192.88742mm"
+   height="137.29831mm"
+   viewBox="0 0 202.3805 144.05554"
    version="1.1"
    id="svg1"
    xml:space="preserve"
@@ -25,7 +25,8 @@
          d="M 5.77,0 -2.88,5 V -5 Z"
          id="path353-5" /></marker></defs><g
      id="layer8"
-     style="display:inline"><g
+     style="display:inline"
+     transform="translate(-0.80164521,-8.28541)"><g
        data-cell-id="1"
        id="g338-2"
        transform="matrix(0.32161027,0,0,0.26453622,41.846706,15.953048)"
@@ -3710,7 +3711,7 @@
              id="path336-5" /></g></g></g></g><g
      id="layer3"
      style="display:none"
-     transform="translate(-3.33248,-5.6736895)"><g
+     transform="translate(-4.1341252,-13.959099)"><g
        data-cell-id="1"
        id="g349"
        transform="matrix(0.32162397,0,0,0.26444284,45.127077,21.66451)"
@@ -7273,7 +7274,8 @@
                pointer-events="all"
                id="path346"
                style="stroke-width:0.35977;stroke-dasharray:none" /></g></g></g></g></g><g
-     id="layer7"><path
+     id="layer7"
+     transform="translate(-0.80164521,-8.28541)"><path
        style="display:inline;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0.76033;stroke-dasharray:2.28099, 0.76033;stroke-dashoffset:0;stroke-opacity:1;marker-end:url(#Triangle-6)"
        d="M 103.15031,136.53884 V 52.157945"
        id="path58-4" /><path
@@ -7303,16 +7305,14 @@
        y="87.505173"
        id="text20"
        transform="matrix(0.91183711,-0.42615425,0,1.0966871,0,0)"><tspan
-         id="tspan20"
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.66252px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:end;text-anchor:end;stroke-width:0;stroke-dasharray:none"
+         id="tspan2"
          x="188.51286"
          y="87.505173">Hierarchy Levels</tspan><tspan
-         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:6.66252px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:end;text-anchor:end;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-dasharray:none;stroke-opacity:1"
+         id="tspan3"
          x="188.51286"
-         y="95.833321"
-         id="tspan21">IEC 62264 // IEC 51612</tspan></text></g><g
+         y="95.833321">IEC 62264 // IEC 61512</tspan></text></g><g
      id="layer4"
-     transform="translate(-3.3324799,-5.6736896)"><text
+     transform="translate(-4.1341251,-13.9591)"><text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.58611px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-linecap:square;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        x="169.67593"
@@ -7408,7 +7408,7 @@
        d="m 115.13285,137.40051 c 35.73438,10.44069 35.73438,10.44069 35.73438,10.44069"
        id="path20-45-47-4" /></g><g
      id="layer5"
-     transform="matrix(0.53136179,-0.04818693,0,0.62720087,22.930703,30.024132)"><path
+     transform="matrix(0.53136179,-0.04818693,0,0.62720087,22.129058,21.738722)"><path
        id="rect23"
        style="fill:#b3b3b3;fill-opacity:1;stroke:#b3b3b3;stroke-width:0.0939844;stroke-linecap:square;stroke-opacity:1"
        d="m 41.953162,131.13516 51.94475,26.48063 3.167253,10.52852 -3.70095,8.63297 -51.411053,-25.42231 z" /><path
@@ -7496,7 +7496,7 @@
          y="120.04073"
          id="tspan24-2">Usage</tspan></text></g><g
      id="layer6"
-     transform="translate(-3.3324799,-5.6736896)"><text
+     transform="translate(-4.1341251,-13.9591)"><text
        xml:space="preserve"
        style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:4.58611px;font-family:Arial;-inkscape-font-specification:'Arial, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-variant-east-asian:normal;text-align:start;text-anchor:start;fill:#000000;fill-opacity:1;stroke:#000000;stroke-width:0;stroke-linecap:square;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1"
        x="5.7395577"
