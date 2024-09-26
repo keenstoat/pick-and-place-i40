@@ -40,7 +40,7 @@ The document is renderer with the following open fonts:
 
 To install a font download it and put the directory with the `ttf` files under the `/usr/local/share/fonts` directory and then run `sudo fc-cache -fv` to update the system fonts cache.
 
-### Vscode extention
+### Vscode extension
 
 You can work with quarto using vscode as IDE. Just install the [quarto extension](https://marketplace.visualstudio.com/items?itemName=quarto.quarto).
 
@@ -55,3 +55,23 @@ quarto render /path/to/document/report/report.qmd
 ```
 
 This can also be achieved with the "Preview" button in vscode.
+
+
+## Exporting the document
+
+If the rendered PDF document is large (as is in this case 45MB!) then it can be compressed with the ghostscript tool.
+
+To do this, install the package:
+
+```bash
+sudo apt install ghostscript
+```
+
+Then run the following command:
+```bash
+gs -sDEVICE=pdfwrite -dCompatibilityLevel=1.4 -dPDFSETTINGS=/printer \
+-dNOPAUSE -dQUIET -dBATCH \
+-sOutputFile=report-compressed.pdf report.pdf
+```
+
+More info [here](https://www.digitalocean.com/community/tutorials/reduce-pdf-file-size-in-linux).
